@@ -15,15 +15,24 @@ app = FastAPI(
     version="0.2.0",
 )
 
-# 3. Cấu hình CORS chuẩn xác (Sử dụng Regex để nhận diện mọi domain Vercel và Localhost)
+
+
+# Cấu hình CORS chuẩn xác nhận diện đúng mọi cấu trúc domain Vercel
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],  # Sửa lỗi chạy local
-    allow_origin_regex=r"https://.*\.vercel\.app",                    # Chấp nhận mọi domain Vercel mà không bị xung đột credentials
+    allow_origins=[
+        "http://localhost:5173", 
+        "http://127.0.0.1:5173",
+        "https://vercel.app"  # Điền trực tiếp domain chính này của bạn vào để an toàn 100%
+    ],
+    allow_origin_regex=r"https://.*vercel\.app",  # Bỏ dấu chấm trước chữ vercel để nhận diện mọi định dạng link vercel
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+
 
 # 4. Đăng ký các Router định tuyến API
 api = "/api/v1"
