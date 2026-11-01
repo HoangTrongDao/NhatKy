@@ -4,6 +4,18 @@ from app.core.config import settings
 from app.db.session import Base, engine
 from app import models  # noqa: F401 — registers SQLAlchemy models
 from app.api.v1 import auth, memories, reflections, goals, community, profile, stats
+from fastapi.middleware.cors import CORSMiddleware
+
+app = FastAPI()
+
+# Thêm đoạn này để cấp "giấy thông hành" cho Vercel gọi vào Render
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Cho phép tất cả các nguồn mạng, bao gồm Vercel
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 Base.metadata.create_all(bind=engine)
 
