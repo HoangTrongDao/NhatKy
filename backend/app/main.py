@@ -4,24 +4,28 @@ from app.core.config import settings
 from app.db.session import Base, engine
 from app import models  # noqa: F401 — registers SQLAlchemy models
 from app.api.v1 import auth, memories, reflections, goals, community, profile, stats
-from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI()
+# 1. Khởi tạo Base Metadata cho Database trước
 Base.metadata.create_all(bind=engine)
-# Thêm đoạn này để cấp "giấy thông hành" cho Vercel gọi vào Render
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Cho phép tất cả các nguồn mạng, bao gồm Vercel
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
+# 2. Khởi tạo FastAPI duy nhất 1 lần với thông tin đầy đủ
 app = FastAPI(
     title="New Beginning API",
     description="API cho cộng đồng lưu giữ điều tốt đẹp và xây dựng tương lai.",
     version="0.2.0",
 )
+
+# 3. Cấu hình CORS chuẩn xác (Sử dụng Regex để nhận diện mọi domain Vercel và Localhost)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],  # Sửa lỗi chạy local
+    allow_origin_regex=r"https://.*\.vercel\.app",                    # Chấp nhận mọi domain Vercel mà không bị xung đột credentials
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# 4. Đăng ký các Router định tuyến API
 api = "/api/v1"
 app.include_router(auth.router, prefix=api)
 app.include_router(memories.router, prefix=api)
