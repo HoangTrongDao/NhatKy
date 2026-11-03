@@ -10,7 +10,7 @@ import ReflectionsPage from './components/ReflectionsPage'
 import GoalsPage from './components/GoalsPage'
 import CommunityPage from './components/CommunityPage'
 import ProfilePage from './components/ProfilePage'
-
+import { Analytics } from '@vercel/analytics/react';
 function App() {
   const [user, setUser] = useState<User | null>(null)
   const [authReady, setAuthReady] = useState(false)
@@ -24,6 +24,7 @@ function App() {
     } else {
       setAuthReady(true)
     }
+    <Analytics />
   }, [])
 
   if (!authReady) {
