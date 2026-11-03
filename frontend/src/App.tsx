@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Route, Routes } from 'react-router-dom'
+import { Analytics } from '@vercel/analytics/react'
 import { api, getToken, setToken, User } from './api'
 import { ToastProvider } from './components/Toast'
 import Layout from './components/Layout'
@@ -45,6 +46,7 @@ function App() {
           <Route path="*" element={<HomePage user={user} />} />
         </Routes>
       </Layout>
+      <Analytics />
     </ToastProvider>
   )
 }
