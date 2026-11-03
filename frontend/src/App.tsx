@@ -24,13 +24,14 @@ function App() {
     } else {
       setAuthReady(true)
     }
-    <Analytics />
   }, [])
 
   if (!authReady) {
-    return <div className="loading">Đang chuẩn bị không gian của bạn…</div>
+    return(
+      <> <div className="loading">Đang chuẩn bị không gian của bạn…</div>
+      <Analytics />
+    </>)
   }
-
   return (
     <ToastProvider>
       <Layout user={user} setUser={setUser}>
