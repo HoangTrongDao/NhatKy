@@ -26,6 +26,10 @@ class ProfileUpdate(BaseModel):
 class ChangePasswordIn(BaseModel):
     current_password: str = Field(min_length=1)
     new_password: str = Field(min_length=8, max_length=128)
+    
+class ForgotPasswordIn(BaseModel):
+    email: EmailStr
+    new_password: str = Field(min_length=8, max_length=128)
 
 class MemoryCreate(BaseModel):
     title: str = Field(min_length=1, max_length=160)

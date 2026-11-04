@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.models.user import User
-from app.schemas import RegisterIn, UserOut, TokenOut, ChangePasswordIn
+from app.schemas import RegisterIn, UserOut, TokenOut, ChangePasswordIn, ForgotPasswordIn
 from app.security import hash_password, verify_password, create_access_token, get_current_user
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -38,3 +38,20 @@ def change_password(payload: ChangePasswordIn, db: Session = Depends(get_db), cu
     current_user.password_hash = hash_password(payload.new_password)
     db.commit()
     return {"detail": "Mật khẩu đã được thay đổi thành công."}
+@router.post("/forgot-password", status_code=status.HTTP_200_OK)
+def forgot_password(payload: ForgotPasswordIn, db: Session = Depends(get_db)):
+    email = str(payload.email).lower()
+
+    user = db.scalar(select(User).where(User.email == email))
+
+    if not user:
+        raise HTTPException(
+            status_code=404,
+            detail="Không tìm thấy tài khoản với email này."
+        )
+
+    user.password_hash = hash_password(payload.new_password)
+
+    db.commit()
+
+    return {"detail": "Mật khẩu đã được cập nhật thành công."}

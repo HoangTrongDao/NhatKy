@@ -26,7 +26,7 @@ export default function ForgotPassword() {
     if (!email) {
         setError('Vui lòng nhập email.')
         return
-    }
+        }
     if (password !== confirmPassword) {
       setError('Mật khẩu xác nhận không khớp.')
       return
