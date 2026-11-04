@@ -38,6 +38,8 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage user={user} />} />
           <Route path="/login" element={<AuthPage mode="login" onUser={setUser} />} />
+          <Route path="/login" element={<AuthPage mode="login" onUser={setUser} />} />
+          <Route path="/register" element={<AuthPage mode="register" onUser={setUser} />} />
           <Route path="/register" element={<AuthPage mode="register" onUser={setUser} />} />
           <Route path="/memories" element={<MemoriesPage user={user} />} />
           <Route path="/reflections" element={<ReflectionsPage user={user} />} />
