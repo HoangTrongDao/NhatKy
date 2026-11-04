@@ -6,6 +6,7 @@ import Layout from './components/Layout'
 import HomePage from './components/HomePage'
 import AuthPage from './components/AuthPage'
 import MemoriesPage from './components/MemoriesPage'
+import FriendsPage from './components/FriendsPage'
 import ForgotPassword from './components/ForgotPassword'
 import ReflectionsPage from './components/ReflectionsPage'
 import GoalsPage from './components/GoalsPage'
@@ -39,13 +40,12 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage user={user} />} />
           <Route path="/login" element={<AuthPage mode="login" onUser={setUser} />} />
-          <Route path="/login" element={<AuthPage mode="login" onUser={setUser} />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/register" element={<AuthPage mode="register" onUser={setUser} />} />
           <Route path="/register" element={<AuthPage mode="register" onUser={setUser} />} />
           <Route path="/memories" element={<MemoriesPage user={user} />} />
           <Route path="/reflections" element={<ReflectionsPage user={user} />} />
           <Route path="/goals" element={<GoalsPage user={user} />} />
+          <Route path="/friends" element={<FriendsPage />} />
           <Route path="/community" element={<CommunityPage />} />
           <Route path="/profile" element={<ProfilePage user={user} onUserUpdate={setUser} />} />
           <Route path="*" element={<HomePage user={user} />} />

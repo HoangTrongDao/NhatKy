@@ -52,6 +52,7 @@ export default function Layout({ user, setUser, children }: LayoutProps) {
           <NavLink to="/memories" onClick={() => setMobileOpen(false)}>Ký ức</NavLink>
           <NavLink to="/reflections" onClick={() => setMobileOpen(false)}>Nhìn lại</NavLink>
           <NavLink to="/goals" onClick={() => setMobileOpen(false)}>Ngày mai</NavLink>
+          <NavLink to="/friends" onClick={() => setMobileOpen(false)}>Bạn bè</NavLink>
           <NavLink to="/community" onClick={() => setMobileOpen(false)}>Cộng đồng</NavLink>
           {user ? (
             <>
