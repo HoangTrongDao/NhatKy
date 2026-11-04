@@ -1,5 +1,9 @@
 {
   "dependencies": {
-    "@vercel/analytics": "^2.0.1"
+    "@vercel/analytics": "^2.0.1",
+    "run": "^2.1.11"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3"
   }
 }

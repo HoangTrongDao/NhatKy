@@ -69,16 +69,15 @@ export default function ForgotPassword() {
 
           <span className="eyebrow">KHÔI PHỤC TÀI KHOẢN</span>
 
-          <h1>Mật khẩu đã được đổi!</h1>
+          <h1>Thành Công</h1>
 
           <p className="muted">
-            Mật khẩu mới của bạn đã được cập nhật.
-            Bây giờ bạn có thể đăng nhập lại bằng mật khẩu mới.
+            Mật khẩu đã được cập nhât, quay về trang đăng nhập
           </p>
 
           <Link className="button primary full" to="/login">
             <ArrowLeft size={16} />
-            Quay lại đăng nhập
+            Quay lại 
           </Link>
 
           <p className="privacy-hint">
