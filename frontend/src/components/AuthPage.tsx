@@ -76,6 +76,11 @@ export default function AuthPage({ mode, onUser }: Props) {
             Mật khẩu
             <input name="password" type="password" minLength={8} maxLength={128} required placeholder="Ít nhất 8 ký tự" />
           </label>
+          {mode === 'login' && (
+            <div className="forgot-password-link">
+              <Link to="/forgot-password">Quên mật khẩu?</Link>
+            </div>
+          )}
           {error && <p className="error-message" role="alert">{error}</p>}
           <button className="button primary full" disabled={busy}>
             {busy ? 'Đang xử lý…' : mode === 'login' ? 'Đăng nhập →' : 'Tạo tài khoản →'}
