@@ -38,7 +38,7 @@ export default function Layout({ user, setUser, children }: LayoutProps) {
       <header className="topbar">
         <Link className="brand" to="/">
           <span className="brand-mark"><Sunrise size={21} /></span>
-          <span>new beginning<small>một khởi đầu dịu dàng</small></span>
+          <span>Nhật-Ký<small>Lưu trữ những ký ức</small></span>
         </Link>
         <div className="topbar-right">
           <button className="icon-button theme-toggle" onClick={toggleTheme} aria-label="Đổi giao diện">
@@ -67,7 +67,7 @@ export default function Layout({ user, setUser, children }: LayoutProps) {
       </header>
       <main>{children}</main>
       <footer className="footer">
-        <span>New Beginning</span>
+        <span>Nhật Ký Của Tôi</span>
         <span>Giữ điều đẹp đẽ. Học từ quá khứ. Cùng xây dựng ngày mai.</span>
       </footer>
     </div>
