@@ -88,6 +88,8 @@ export type ChangePasswordPayload = {
   new_password: string
 }
 
+
+
 /* ── API helpers ── */
 export const fetchProfile = () => api<User>('/profile')
 export const updateProfile = (data: ProfileUpdate) =>
@@ -95,3 +97,13 @@ export const updateProfile = (data: ProfileUpdate) =>
 export const changePassword = (data: ChangePasswordPayload) =>
   api<void>('/auth/change-password', { method: 'POST', body: JSON.stringify(data) })
 export const fetchDashboardStats = () => api<DashboardStats>('/stats/dashboard')
+export type ForgotPasswordPayload = {
+  email: string
+  new_password: string
+}
+
+export const forgotPassword = (data: ForgotPasswordPayload) =>
+  api<{ detail: string }>('/auth/forgot-password', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  })
