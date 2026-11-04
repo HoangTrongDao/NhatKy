@@ -88,7 +88,27 @@ export type ChangePasswordPayload = {
   new_password: string
 }
 
+/* ── Friends Types ── */
 
+export type FriendUser = {
+  id: number
+  email: string
+  display_name: string
+  bio: string
+  created_at: string
+}
+
+export type FriendRequest = {
+  id: number
+  status: string
+  created_at: string
+  sender: FriendUser
+  receiver: FriendUser
+}
+
+export type FriendAction = {
+  detail: string
+}
 
 /* ── API helpers ── */
 export const fetchProfile = () => api<User>('/profile')
@@ -106,4 +126,46 @@ export const forgotPassword = (data: ForgotPasswordPayload) =>
   api<{ detail: string }>('/auth/forgot-password', {
     method: 'POST',
     body: JSON.stringify(data)
+  })
+
+  /* ── Friends API ── */
+
+// Lấy danh sách bạn bè
+export const fetchFriends = () =>
+  api<FriendUser[]>('/friends')
+
+// Lấy lời mời kết bạn nhận được
+export const fetchFriendRequests = () =>
+  api<FriendRequest[]>('/friends/requests')
+
+// Lấy lời mời kết bạn đã gửi
+export const fetchSentFriendRequests = () =>
+  api<FriendRequest[]>('/friends/sent')
+
+// Lấy danh sách người có thể kết bạn
+export const fetchFriendSuggestions = () =>
+  api<FriendUser[]>('/friends/suggestions')
+
+// Gửi lời mời kết bạn
+export const sendFriendRequest = (userId: number) =>
+  api<FriendAction>(`/friends/requests/${userId}`, {
+    method: 'POST'
+  })
+
+// Chấp nhận lời mời kết bạn
+export const acceptFriendRequest = (requestId: number) =>
+  api<FriendAction>(`/friends/requests/${requestId}/accept`, {
+    method: 'POST'
+  })
+
+// Từ chối hoặc hủy lời mời kết bạn
+export const deleteFriendRequest = (requestId: number) =>
+  api<FriendAction>(`/friends/requests/${requestId}`, {
+    method: 'DELETE'
+  })
+
+// Hủy kết bạn
+export const removeFriend = (userId: number) =>
+  api<FriendAction>(`/friends/${userId}`, {
+    method: 'DELETE'
   })

@@ -4,6 +4,17 @@ from app.core.config import settings
 from app.db.session import Base, engine
 from app import models  # noqa: F401 — registers SQLAlchemy models
 from app.api.v1 import auth, memories, reflections, goals, community, profile, stats
+from app import models
+from app.api.v1 import (
+    auth,
+    memories,
+    reflections,
+    goals,
+    community,
+    profile,
+    stats,
+    friends,
+)
 
 # 1. Khởi tạo Base Metadata cho Database trước
 Base.metadata.create_all(bind=engine)
@@ -43,6 +54,7 @@ app.include_router(goals.router, prefix=api)
 app.include_router(community.router, prefix=api)
 app.include_router(profile.router, prefix=api)
 app.include_router(stats.router, prefix=api)
+app.include_router(friends.router, prefix=api)
 
 @app.get("/")
 def root():
