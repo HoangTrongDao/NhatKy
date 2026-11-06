@@ -9,6 +9,7 @@ class Memory(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
     title: Mapped[str] = mapped_column(String(160))
     content: Mapped[str] = mapped_column(Text)
+    image_url: Mapped[str | None] = mapped_column(Text, nullable=True, default=None)
     occurred_at: Mapped[date | None] = mapped_column(Date, nullable=True)
     visibility: Mapped[str] = mapped_column(String(10), default="private", index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))

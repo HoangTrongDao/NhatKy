@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Users, HeartHandshake } from 'lucide-react'
+import { Users, HeartHandshake, Calendar, Maximize2, X } from 'lucide-react'
 import { api, FeedItem } from '../api'
 import PageHeader from './PageHeader'
 import EmptyCard from './EmptyCard'
@@ -9,11 +9,20 @@ export default function CommunityPage() {
   const [items, setItems] = useState<FeedItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [lightboxItem, setLightboxItem] = useState<FeedItem | null>(null)
 
   useEffect(() => {
     api<FeedItem[]>('/community/feed')
       .then(data => { setItems(data); setLoading(false) })
       .catch(e => { setError(e instanceof Error ? e.message : 'Không tải được bảng tin.'); setLoading(false) })
+  }, [])
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') setLightboxItem(null)
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
 
   return (
@@ -44,7 +53,7 @@ export default function CommunityPage() {
           />
         ) : (
           items.map(item => (
-            <article className="feed-card" key={item.id}>
+            <article className={`feed-card ${item.image_url ? 'has-locket-photo' : ''}`} key={item.id}>
               <div className="feed-author">
                 <div className="avatar">{item.author.slice(0, 1).toUpperCase()}</div>
                 <div>
@@ -53,6 +62,34 @@ export default function CommunityPage() {
                 </div>
                 <span className="public-pill">Công khai</span>
               </div>
+
+              {/* ── Locket Photo Presentation in Community Feed ── */}
+              {item.image_url && (
+                <div
+                  className="locket-card-widget"
+                  onClick={() => setLightboxItem(item)}
+                  title="Chạm để xem ảnh toàn màn hình"
+                >
+                  <img
+                    src={item.image_url}
+                    alt={item.title}
+                    className="locket-widget-img"
+                    loading="lazy"
+                  />
+                  <div className="locket-overlay-bottom">
+                    <span className="locket-caption-pill">{item.title}</span>
+                  </div>
+                  <button
+                    type="button"
+                    className="locket-zoom-hint"
+                    aria-label="Xem ảnh lớn"
+                    onClick={(e) => { e.stopPropagation(); setLightboxItem(item) }}
+                  >
+                    <Maximize2 size={13} />
+                  </button>
+                </div>
+              )}
+
               <h2>{item.title}</h2>
               <p>{item.content}</p>
               <div className="feed-footer">
@@ -62,6 +99,46 @@ export default function CommunityPage() {
           ))
         )}
       </div>
+
+      {/* ── Community Locket Lightbox ── */}
+      {lightboxItem && lightboxItem.image_url && (
+        <div
+          className="locket-lightbox-overlay"
+          onClick={() => setLightboxItem(null)}
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="locket-lightbox-card" onClick={e => e.stopPropagation()}>
+            <button
+              className="locket-lightbox-close"
+              onClick={() => setLightboxItem(null)}
+              aria-label="Đóng"
+            >
+              <X size={20} />
+            </button>
+
+            <div className="locket-lightbox-photo-wrap">
+              <img
+                src={lightboxItem.image_url}
+                alt={lightboxItem.title}
+                className="locket-lightbox-img"
+              />
+              <div className="locket-lightbox-time-pill">
+                <Calendar size={13} />
+                {lightboxItem.occurred_at || new Date(lightboxItem.created_at).toLocaleDateString('vi-VN')}
+              </div>
+            </div>
+
+            <div className="locket-lightbox-details">
+              <div className="locket-lightbox-header">
+                <h3>{lightboxItem.title}</h3>
+                <span className="mini-tag">Người chia sẻ: {lightboxItem.author}</span>
+              </div>
+              <p className="locket-lightbox-story">{lightboxItem.content}</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

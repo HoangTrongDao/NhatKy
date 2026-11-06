@@ -75,3 +75,21 @@ def test_pagination(client, auth_headers):
     assert len(resp.json()) == 2
     resp2 = client.get("/api/v1/memories?limit=2&offset=4", headers=auth_headers)
     assert len(resp2.json()) == 1
+
+
+def test_create_memory_with_locket_image(client, auth_headers):
+    resp = client.post("/api/v1/memories", json={
+        "title": "Locket moment",
+        "content": "Sunset with friends",
+        "image_url": "data:image/jpeg;base64,locket123",
+        "visibility": "public"
+    }, headers=auth_headers)
+    assert resp.status_code == 201
+    data = resp.json()
+    assert data["image_url"] == "data:image/jpeg;base64,locket123"
+
+    mid = data["id"]
+    get_resp = client.get(f"/api/v1/memories/{mid}", headers=auth_headers)
+    assert get_resp.status_code == 200
+    assert get_resp.json()["image_url"] == "data:image/jpeg;base64,locket123"
+

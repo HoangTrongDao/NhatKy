@@ -24,6 +24,7 @@ def community_feed(
         "id": item.id,
         "title": item.title,
         "content": item.content,
+        "image_url": item.image_url,
         "occurred_at": item.occurred_at.isoformat() if item.occurred_at else None,
         "created_at": item.created_at.isoformat(),
         "author": item.owner.display_name if item.owner else "Thành viên",

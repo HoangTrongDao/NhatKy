@@ -34,6 +34,7 @@ export type Memory = {
   id: number
   title: string
   content: string
+  image_url?: string | null
   occurred_at: string | null
   visibility: 'private' | 'public'
   created_at: string
@@ -64,6 +65,7 @@ export type FeedItem = {
   id: number
   title: string
   content: string
+  image_url?: string | null
   occurred_at: string | null
   created_at: string
   author: string

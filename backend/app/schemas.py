@@ -44,12 +44,14 @@ class ForgotPasswordIn(BaseModel):
 class MemoryCreate(BaseModel):
     title: str = Field(min_length=1, max_length=160)
     content: str = Field(min_length=1, max_length=10000)
+    image_url: str | None = None
     occurred_at: date | None = None
     visibility: Literal["private", "public"] = "private"
 
 class MemoryUpdate(BaseModel):
     title: str | None = Field(default=None, min_length=1, max_length=160)
     content: str | None = Field(default=None, min_length=1, max_length=10000)
+    image_url: str | None = None
     occurred_at: date | None = None
     visibility: Literal["private", "public"] | None = None
 
@@ -59,6 +61,7 @@ class MemoryOut(BaseModel):
     user_id: int
     title: str
     content: str
+    image_url: str | None = None
     occurred_at: date | None
     visibility: str
     created_at: datetime

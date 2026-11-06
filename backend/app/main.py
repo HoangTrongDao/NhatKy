@@ -19,10 +19,15 @@ from app.api.v1 import (
 # 1. Khởi tạo Base Metadata cho Database trước
 Base.metadata.create_all(bind=engine)
 
-# Đảm bảo trường avatar_url tồn tại nếu database đã có sẵn từ trước
+# Đảm bảo trường avatar_url và image_url tồn tại nếu database đã có sẵn từ trước
 with engine.connect() as conn:
     try:
         conn.execute(text("ALTER TABLE users ADD COLUMN avatar_url TEXT DEFAULT ''"))
+        conn.commit()
+    except Exception:
+        pass
+    try:
+        conn.execute(text("ALTER TABLE memories ADD COLUMN image_url TEXT DEFAULT NULL"))
         conn.commit()
     except Exception:
         pass
