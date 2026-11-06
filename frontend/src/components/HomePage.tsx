@@ -1,26 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  BookHeart, HeartHandshake, Leaf, Sparkles, Sunrise, Users, Target, BarChart3,
+  BookHeart, HeartHandshake, Leaf, Sparkles, Sunrise, Users, Target, BarChart3
 } from 'lucide-react'
 import { User, DashboardStats, fetchDashboardStats } from '../api'
 
-/* ── Feature card ── */
-function Feature({ icon, number, title, description, to, tone }: {
-  icon: React.ReactNode; number: string; title: string; description: string; to: string; tone: string
-}) {
-  return (
-    <Link className="feature-card" to={to}>
-      <div className={`feature-icon ${tone}`}>{icon}</div>
-      <span className="feature-number">{number}</span>
-      <h3>{title}</h3>
-      <p>{description}</p>
-      <span className="feature-link">Khám phá <span>↗</span></span>
-    </Link>
-  )
-}
-
-/* ── Dashboard (logged-in) ── */
+/* ── Dashboard (Logged in) ── */
 function Dashboard({ user }: { user: User }) {
   const [stats, setStats] = useState<DashboardStats | null>(null)
 
@@ -29,64 +14,157 @@ function Dashboard({ user }: { user: User }) {
   }, [])
 
   return (
-    <div className="page">
-      <section className="dashboard-hero">
-        <span className="eyebrow"><Sparkles size={15} /> TỔNG QUAN CỦA BẠN</span>
-        <h1>Xin chào, <em>{user.display_name}</em></h1>
-        <p className="hero-lede">Mỗi ngày là một cơ hội mới để trân trọng và tiến về phía trước.</p>
+    <div className="page dashboard-page">
+      {/* ── ZONE 1: HERO GREETING BANNER ── */}
+      <section className="dash-hero-card">
+        <div className="dash-hero-left">
+          <div className="dash-user-badge">
+            <div className="dash-avatar-large">
+              {user.display_name.charAt(0).toUpperCase()}
+            </div>
+            <div>
+              <span className="eyebrow-chip"><Sparkles size={13} /> KHÔNG GIAN BÌNH YÊN</span>
+              <h1>Xin chào, <em>{user.display_name}</em></h1>
+            </div>
+          </div>
+          <p className="dash-hero-desc">
+            Chào mừng bạn trở lại. Mỗi ngày là một trang sách mới để ghi lại những điều quý giá và vững bước tiến về phía trước.
+          </p>
+        </div>
+        <div className="dash-hero-right">
+          <div className="journey-badge">
+            <span className="journey-num">{stats?.days_since_joined ? `${stats.days_since_joined}` : '1'}</span>
+            <span className="journey-text">Ngày đồng hành cùng New Beginning</span>
+          </div>
+        </div>
       </section>
 
-      {stats && (
-        <section className="stats-grid">
-          <div className="stat-card peach">
-            <div className="stat-icon"><BookHeart size={22} /></div>
-            <div className="stat-value">{stats.total_memories}</div>
-            <div className="stat-label">Kỷ niệm</div>
+      {/* ── ZONE 2: STATS OVERVIEW ── */}
+      <section className="dash-section">
+        <div className="section-title-bar">
+          <div>
+            <span className="eyebrow"><BarChart3 size={14} /> THỐNG KÊ HÀNH TRÌNH</span>
+            <h2>Những chặng đường bạn đã đi qua</h2>
           </div>
-          <div className="stat-card sage">
-            <div className="stat-icon"><Leaf size={22} /></div>
-            <div className="stat-value">{stats.total_reflections}</div>
-            <div className="stat-label">Suy ngẫm</div>
-          </div>
-          <div className="stat-card gold">
-            <div className="stat-icon"><Target size={22} /></div>
-            <div className="stat-value">{stats.total_goals}</div>
-            <div className="stat-label">Mục tiêu</div>
-          </div>
-          <div className="stat-card green">
-            <div className="stat-icon"><BarChart3 size={22} /></div>
-            <div className="stat-value">{stats.goals_completed}</div>
-            <div className="stat-label">Đã hoàn thành</div>
-          </div>
-        </section>
-      )}
+        </div>
 
+        <div className="stats-grid-v2">
+          <div className="stat-card-v2 peach">
+            <div className="stat-card-header">
+              <div className="stat-card-icon"><BookHeart size={22} /></div>
+              <span className="stat-card-pill">KÝ ỨC</span>
+            </div>
+            <div className="stat-card-body">
+              <div className="stat-number">{stats?.total_memories ?? 0}</div>
+              <div className="stat-title">Khoảnh khắc trân quý</div>
+              <p className="stat-desc">Những kỷ niệm đẹp được lưu lại an toàn.</p>
+            </div>
+            <Link to="/memories" className="stat-card-link">Xem tất cả ký ức <span>→</span></Link>
+          </div>
+
+          <div className="stat-card-v2 sage">
+            <div className="stat-card-header">
+              <div className="stat-card-icon"><Leaf size={22} /></div>
+              <span className="stat-card-pill">NHÌN LẠI</span>
+            </div>
+            <div className="stat-card-body">
+              <div className="stat-number">{stats?.total_reflections ?? 0}</div>
+              <div className="stat-title">Bài học & Suy ngẫm</div>
+              <p className="stat-desc">Học từ quá khứ để tâm hồn nhẹ nhàng hơn.</p>
+            </div>
+            <Link to="/reflections" className="stat-card-link">Xem suy ngẫm <span>→</span></Link>
+          </div>
+
+          <div className="stat-card-v2 gold">
+            <div className="stat-card-header">
+              <div className="stat-card-icon"><Target size={22} /></div>
+              <span className="stat-card-pill">MỤC TIÊU</span>
+            </div>
+            <div className="stat-card-body">
+              <div className="stat-number">{stats?.total_goals ?? 0}</div>
+              <div className="stat-title">Kế hoạch tương lai</div>
+              <p className="stat-desc">Mục tiêu đang từng bước được hiện thực hóa.</p>
+            </div>
+            <Link to="/goals" className="stat-card-link">Quản lý mục tiêu <span>→</span></Link>
+          </div>
+
+          <div className="stat-card-v2 rose">
+            <div className="stat-card-header">
+              <div className="stat-card-icon"><Sparkles size={22} /></div>
+              <span className="stat-card-pill">HOÀN THÀNH</span>
+            </div>
+            <div className="stat-card-body">
+              <div className="stat-number">{stats?.goals_completed ?? 0}</div>
+              <div className="stat-title">Thành tựu đạt được</div>
+              <p className="stat-desc">Minh chứng cho nỗ lực không ngừng của bạn.</p>
+            </div>
+            <Link to="/goals" className="stat-card-link">Xem thành tựu <span>→</span></Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ── ZONE 3: RECENT MEMORY HIGHLIGHT ── */}
       {stats?.recent_memory_title && (
-        <section className="recent-highlight">
-          <span className="eyebrow">KỶ NIỆM MỚI NHẤT</span>
-          <h2>{stats.recent_memory_title}</h2>
-          <Link className="button secondary" to="/memories">Xem tất cả ký ức →</Link>
+        <section className="dash-section">
+          <div className="recent-highlight-card">
+            <div className="highlight-tag">
+              <Sparkles size={14} /> GẦN ĐÂY NHẤT
+            </div>
+            <div className="highlight-content">
+              <h3>"{stats.recent_memory_title}"</h3>
+              <p>Mỗi ký ức là một món quà thời gian gửi lại cho tâm hồn bạn.</p>
+            </div>
+            <Link className="button primary highlight-btn" to="/memories">
+              Mở sổ ký ức <span>→</span>
+            </Link>
+          </div>
         </section>
       )}
 
-      <section className="quick-actions">
-        <span className="eyebrow">HÀNH ĐỘNG NHANH</span>
-        <div className="quick-actions-grid">
-          <Link className="quick-action-card" to="/memories">
-            <BookHeart size={20} />
-            <span>Thêm ký ức mới</span>
+      {/* ── ZONE 4: QUICK ACTION TILES ── */}
+      <section className="dash-section">
+        <div className="section-title-bar">
+          <div>
+            <span className="eyebrow"><Sparkles size={14} /> LỐI TẮT NHANH</span>
+            <h2>Bạn muốn làm gì hôm nay?</h2>
+          </div>
+        </div>
+
+        <div className="quick-actions-grid-v2">
+          <Link className="quick-action-tile" to="/memories">
+            <div className="tile-icon-box peach"><BookHeart size={24} /></div>
+            <div className="tile-text">
+              <strong>Lưu giữ ký ức</strong>
+              <span>Viết lại câu chuyện làm bạn mỉm cười</span>
+            </div>
+            <span className="tile-arrow">↗</span>
           </Link>
-          <Link className="quick-action-card" to="/reflections">
-            <Leaf size={20} />
-            <span>Viết suy ngẫm</span>
+
+          <Link className="quick-action-tile" to="/reflections">
+            <div className="tile-icon-box sage"><Leaf size={24} /></div>
+            <div className="tile-text">
+              <strong>Viết nhìn lại</strong>
+              <span>Ghi lại cảm xúc & đúc kết bài học</span>
+            </div>
+            <span className="tile-arrow">↗</span>
           </Link>
-          <Link className="quick-action-card" to="/goals">
-            <Target size={20} />
-            <span>Đặt mục tiêu mới</span>
+
+          <Link className="quick-action-tile" to="/goals">
+            <div className="tile-icon-box gold"><Target size={24} /></div>
+            <div className="tile-text">
+              <strong>Đặt mục tiêu</strong>
+              <span>Lên kế hoạch cho những bước đi tới</span>
+            </div>
+            <span className="tile-arrow">↗</span>
           </Link>
-          <Link className="quick-action-card" to="/community">
-            <Users size={20} />
-            <span>Ghé cộng đồng</span>
+
+          <Link className="quick-action-tile" to="/community">
+            <div className="tile-icon-box rose"><Users size={24} /></div>
+            <div className="tile-text">
+              <strong>Ghé cộng đồng</strong>
+              <span>Chia sẻ và đọc những câu chuyện ấm áp</span>
+            </div>
+            <span className="tile-arrow">↗</span>
           </Link>
         </div>
       </section>
@@ -94,72 +172,128 @@ function Dashboard({ user }: { user: User }) {
   )
 }
 
-/* ── Landing page (not logged-in) ── */
+/* ── Landing Page (Guest) ── */
 function Landing() {
   return (
-    <div className="page">
-      <section className="hero">
+    <div className="page landing-page">
+      {/* ── HERO SHOWCASE ── */}
+      <section className="hero-showcase">
         <div className="hero-copy">
-          <span className="eyebrow"><Sparkles size={15} /> MỘT NƠI ĐỂ BẮT ĐẦU LẠI</span>
-          <h1>Điều đẹp đẽ<br /><em>vẫn xứng đáng được giữ lại.</em></h1>
+          <div className="eyebrow-pill">
+            <Sparkles size={14} /> KHÔNG GIAN BÌNH YÊN CHO TÂM HỒN
+          </div>
+          <h1>
+            Điều đẹp đẽ<br />
+            <em>vẫn xứng đáng được giữ lại.</em>
+          </h1>
           <p className="hero-lede">
-            Không cần xóa đi những gì đã qua. Ta có thể trân trọng điều tốt đẹp, học từ những điều
-            chưa trọn vẹn và dành chỗ cho một ngày mai khác.
+            Không cần vội vã xóa đi quá khứ. Ta có thể trân trọng điều tốt đẹp,
+            học từ những điều chưa trọn vẹn và nhẹ nhàng mở lối cho một ngày mai tươi sáng hơn.
           </p>
           <div className="hero-actions">
-            <Link className="button primary" to="/register">Bắt đầu hành trình <span>→</span></Link>
-            <Link className="button secondary" to="/community"><Users size={17} /> Ghé thăm cộng đồng</Link>
+            <Link className="button primary btn-hero-cta" to="/register">
+              Bắt đầu hành trình <span>→</span>
+            </Link>
+            <Link className="button secondary btn-hero-secondary" to="/community">
+              <Users size={16} /> Ghé thăm cộng đồng
+            </Link>
           </div>
-          <div className="gentle-note">
-            <span className="note-dot" /> Bạn không cần phải ổn ngay hôm nay. Cứ bắt đầu từ một điều nhỏ.
+          <div className="gentle-note-box">
+            <span className="note-dot" />
+            <span>Bạn không cần phải hoàn hảo ngay hôm nay. Cứ bắt đầu từ một điều giản dị nhất.</span>
           </div>
         </div>
-        <div className="hero-art" aria-label="Minh họa mặt trời mọc">
-          <div className="sun-glow" />
-          <div className="sun" />
-          <div className="hill hill-back" />
-          <div className="hill hill-front" />
-          <div className="art-label">
-            <span>01 / EVERY NEW DAY</span>
-            <strong>Mọi điều tốt đẹp<br />đều có thể bắt đầu lại.</strong>
+
+        <div className="hero-art-container" aria-label="Minh họa mặt trời mọc">
+          <div className="hero-art-glass">
+            <div className="sun-glow" />
+            <div className="sun" />
+            <div className="hill hill-back" />
+            <div className="hill hill-front" />
+            <div className="art-card-floating">
+              <span className="art-card-tag">01 / KHỞI ĐẦU MỚI</span>
+              <strong>Mọi điều tốt đẹp đều có thể bắt đầu lại từ hôm nay.</strong>
+            </div>
+            <div className="floating-sparkle">✦</div>
           </div>
-          <div className="floating-leaf">✳</div>
         </div>
       </section>
 
-      <section className="section-intro">
-        <span className="eyebrow">KHÔNG GIAN CỦA BẠN</span>
-        <h2>Ba cách để bước tiếp,<br /><em>theo nhịp của riêng mình.</em></h2>
+      {/* ── 3 TRỤ CỘT CỐT LÕI ── */}
+      <section className="landing-section">
+        <div className="section-title-center">
+          <span className="eyebrow-pill"><Leaf size={14} /> 3 BƯỚC ĐỒNG HÀNH</span>
+          <h2>Ba cách dịu dàng để bước tiếp<br /><em>theo nhịp điệu của riêng bạn</em></h2>
+          <p className="section-sub">Mỗi tính năng được thiết kế để nâng đỡ cảm xúc và định hướng tương lai.</p>
+        </div>
+
+        <div className="feature-grid-v2">
+          <Link className="feature-card-v2 peach" to="/memories">
+            <div className="feature-card-top">
+              <div className="feature-icon-v2"><BookHeart size={24} /></div>
+              <span className="feature-badge">BƯỚC 01</span>
+            </div>
+            <h3>Giữ Lại Điều Đẹp</h3>
+            <p>Lưu giữ những khoảnh khắc, con người và câu chuyện từng làm trái tim bạn rung động và ấm áp.</p>
+            <div className="feature-card-bottom">
+              <span>Mở trang ký ức</span>
+              <span className="arrow-box">↗</span>
+            </div>
+          </Link>
+
+          <Link className="feature-card-v2 sage" to="/reflections">
+            <div className="feature-card-top">
+              <div className="feature-icon-v2"><Leaf size={24} /></div>
+              <span className="feature-badge">BƯỚC 02</span>
+            </div>
+            <h3>Nhìn Lại Dịu Dàng</h3>
+            <p>Viết xuống điều đã xảy ra, giải tỏa cảm xúc sâu kín và chắt lọc những bài học ý nghĩa nhất.</p>
+            <div className="feature-card-bottom">
+              <span>Bắt đầu suy ngẫm</span>
+              <span className="arrow-box">↗</span>
+            </div>
+          </Link>
+
+          <Link className="feature-card-v2 gold" to="/goals">
+            <div className="feature-card-top">
+              <div className="feature-icon-v2"><Sunrise size={24} /></div>
+              <span className="feature-badge">BƯỚC 03</span>
+            </div>
+            <h3>Viết Tiếp Ngày Mai</h3>
+            <p>Đặt từng mục tiêu nhỏ cụ thể và biến ước mơ hy vọng thành hành động tích cực mỗi ngày.</p>
+            <div className="feature-card-bottom">
+              <span>Lên kế hoạch ngay</span>
+              <span className="arrow-box">↗</span>
+            </div>
+          </Link>
+        </div>
       </section>
 
-      <section className="feature-grid">
-        <Feature icon={<BookHeart />} number="01" title="Giữ lại điều đẹp"
-          description="Lưu những khoảnh khắc, con người và câu chuyện từng làm trái tim bạn ấm lại."
-          to="/memories" tone="peach" />
-        <Feature icon={<Leaf />} number="02" title="Nhìn lại dịu dàng"
-          description="Viết xuống điều đã xảy ra, điều bạn cảm thấy và bài học muốn mang theo."
-          to="/reflections" tone="sage" />
-        <Feature icon={<Sunrise />} number="03" title="Viết tiếp ngày mai"
-          description="Đặt một mục tiêu nhỏ và biến hy vọng thành hành động có thể thực hiện."
-          to="/goals" tone="gold" />
-      </section>
-
-      <section className="quote-panel">
-        <span className="quote-mark">"</span>
+      {/* ── QUOTE PANEL ── */}
+      <section className="quote-showcase-box">
+        <div className="quote-mark-large">“</div>
         <blockquote>
-          Ta không thể viết lại trang đầu tiên, nhưng có thể bắt đầu từ hôm nay để viết nên một chương mới.
+          Ta không thể viết lại trang đầu tiên của cuộc đời, nhưng luôn có thể bắt đầu từ hôm nay để viết nên một chương mới thật rạng rỡ.
         </blockquote>
-        <span className="quote-caption">MỘT LỜI NHẮC NHẸ NHÀNG</span>
+        <div className="quote-divider" />
+        <span className="quote-author-label">MỘT LỜI NHẮC NHẸ NHÀNG DÀNH CHO BẠN</span>
       </section>
 
-      <section className="community-banner">
-        <div className="community-icon"><HeartHandshake /></div>
-        <div>
-          <span className="eyebrow">CÙNG NHAU TỐT HƠN</span>
-          <h2>Một cộng đồng biết lắng nghe.</h2>
-          <p>Chia sẻ điều bạn sẵn lòng chia sẻ. Tôn trọng câu chuyện và ranh giới của nhau.</p>
+      {/* ── COMMUNITY CALLOUT ── */}
+      <section className="community-showcase-card">
+        <div className="community-showcase-left">
+          <div className="community-showcase-icon">
+            <HeartHandshake size={32} />
+          </div>
+          <div>
+            <span className="eyebrow-chip"><Users size={13} /> CỘNG ĐỒNG YÊU THƯƠNG</span>
+            <h2>Một không gian biết lắng nghe & sẻ chia</h2>
+            <p>Nơi mọi người tôn trọng ranh giới, giữ gìn điều tử tế và lan tỏa những nguồn năng lượng lành mạnh.</p>
+          </div>
         </div>
-        <Link className="button secondary" to="/community">Khám phá cộng đồng →</Link>
+        <Link className="button primary btn-community-join" to="/community">
+          Khám phá cộng đồng <span>→</span>
+        </Link>
       </section>
     </div>
   )

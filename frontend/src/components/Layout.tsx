@@ -1,6 +1,10 @@
 import { useState, useEffect, ReactNode } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { LogIn, LogOut, Menu, Moon, Sun, Sunrise, User as UserIcon, MessageSquare, X } from 'lucide-react'
+import {
+  LogIn, LogOut, Menu, Moon, Sun, Sunrise,
+  User as UserIcon, MessageSquare, X,
+  BookHeart, Leaf, Target, Users, Sparkles
+} from 'lucide-react'
 import { fetchUnreadCount, setToken, User } from '../api'
 
 interface LayoutProps {
@@ -57,60 +61,111 @@ export default function Layout({ user, setUser, children }: LayoutProps) {
   return (
     <div className="app-shell">
       <header className="topbar">
-        <Link className="brand" to="/">
-          <span className="brand-mark"><Sunrise size={21} /></span>
-          <span>Nhật-Ký<small>Lưu trữ những ký ức</small></span>
-        </Link>
-        <div className="topbar-right">
-          <button className="icon-button theme-toggle" onClick={toggleTheme} aria-label="Đổi giao diện">
-            {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
-          </button>
-          <button className="icon-button mobile-menu" onClick={() => setMobileOpen(!mobileOpen)} aria-label="Mở menu">
-            {mobileOpen ? <X /> : <Menu />}
-          </button>
-        </div>
-        <nav className={mobileOpen ? 'nav open' : 'nav'}>
-          <NavLink to="/memories" onClick={() => setMobileOpen(false)}>Ký ức</NavLink>
-          <NavLink to="/reflections" onClick={() => setMobileOpen(false)}>Nhìn lại</NavLink>
-          <NavLink to="/goals" onClick={() => setMobileOpen(false)}>Ngày mai</NavLink>
-          <NavLink to="/friends" onClick={() => setMobileOpen(false)}>Bạn bè</NavLink>
-          {user && (
-            <NavLink to="/messages" onClick={() => setMobileOpen(false)} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-              <MessageSquare size={15} />
-              <span>Tin nhắn</span>
-              {unreadCount > 0 && (
-                <span style={{
-                  background: 'var(--green, #e6677e)',
-                  color: '#fff',
-                  fontSize: '0.68rem',
-                  fontWeight: 800,
-                  borderRadius: '10px',
-                  padding: '1px 6px',
-                  lineHeight: '1.2',
-                  boxShadow: '0 2px 6px rgba(230, 103, 126, 0.35)'
-                }}>
-                  {unreadCount > 99 ? '99+' : unreadCount}
-                </span>
-              )}
+        <div className="topbar-inner">
+          {/* ── Brand Logo ── */}
+          <Link className="brand" to="/">
+            <span className="brand-mark">
+              <Sunrise size={22} />
+            </span>
+            <div className="brand-text">
+              <span className="brand-title">NHẬT KÝ</span>
+              <span className="brand-badge">NEW BEGINNING</span>
+            </div>
+          </Link>
+
+          {/* ── Floating Island Navigation ── */}
+          <nav className={mobileOpen ? 'nav-island open' : 'nav-island'}>
+            <NavLink to="/memories" className="nav-item" onClick={() => setMobileOpen(false)}>
+              <BookHeart size={15} />
+              <span>Ký ức</span>
             </NavLink>
-          )}
-          <NavLink to="/community" onClick={() => setMobileOpen(false)}>Cộng đồng</NavLink>
-          {user ? (
-            <>
-              <NavLink to="/profile" className="nav-profile-link" onClick={() => setMobileOpen(false)}>
-                <UserIcon size={15} /> Hồ sơ
+            <NavLink to="/reflections" className="nav-item" onClick={() => setMobileOpen(false)}>
+              <Leaf size={15} />
+              <span>Nhìn lại</span>
+            </NavLink>
+            <NavLink to="/goals" className="nav-item" onClick={() => setMobileOpen(false)}>
+              <Target size={15} />
+              <span>Ngày mai</span>
+            </NavLink>
+            <NavLink to="/friends" className="nav-item" onClick={() => setMobileOpen(false)}>
+              <Users size={15} />
+              <span>Bạn bè</span>
+            </NavLink>
+            {user && (
+              <NavLink to="/messages" className="nav-item nav-msg" onClick={() => setMobileOpen(false)}>
+                <MessageSquare size={15} />
+                <span>Tin nhắn</span>
+                {unreadCount > 0 && (
+                  <span className="nav-badge-count">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
               </NavLink>
-              <button className="nav-user" onClick={signOut}><LogOut size={16} /> Đăng xuất</button>
-            </>
-          ) : (
-            <Link className="nav-login" to="/login"><LogIn size={16} /> Đăng nhập</Link>
-          )}
-        </nav>
+            )}
+            <NavLink to="/community" className="nav-item" onClick={() => setMobileOpen(false)}>
+              <Sparkles size={15} />
+              <span>Cộng đồng</span>
+            </NavLink>
+
+            {/* Mobile-only profile & logout inside drawer */}
+            <div className="mobile-user-drawer">
+              {user ? (
+                <>
+                  <NavLink to="/profile" className="mobile-profile-link" onClick={() => setMobileOpen(false)}>
+                    <UserIcon size={16} /> Hồ sơ cá nhân ({user.display_name})
+                  </NavLink>
+                  <button className="mobile-logout-btn" onClick={() => { signOut(); setMobileOpen(false); }}>
+                    <LogOut size={16} /> Đăng xuất
+                  </button>
+                </>
+              ) : (
+                <Link className="mobile-login-btn" to="/login" onClick={() => setMobileOpen(false)}>
+                  <LogIn size={16} /> Đăng nhập / Bắt đầu
+                </Link>
+              )}
+            </div>
+          </nav>
+
+          {/* ── Topbar Actions (Desktop) ── */}
+          <div className="topbar-actions">
+            <button className="theme-toggle-btn" onClick={toggleTheme} aria-label="Đổi giao diện" title={theme === 'light' ? 'Chế độ tối' : 'Chế độ sáng'}>
+              {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+            </button>
+
+            {user ? (
+              <div className="user-action-group">
+                <Link to="/profile" className="user-pill" title="Xem hồ sơ">
+                  <span className="user-pill-avatar">
+                    {user.display_name.charAt(0).toUpperCase()}
+                  </span>
+                  <span className="user-pill-name">{user.display_name}</span>
+                </Link>
+                <button className="logout-icon-btn" onClick={signOut} title="Đăng xuất">
+                  <LogOut size={16} />
+                </button>
+              </div>
+            ) : (
+              <Link className="login-pill-btn" to="/login">
+                <LogIn size={15} />
+                <span>Đăng nhập</span>
+              </Link>
+            )}
+
+            <button className="mobile-menu-trigger" onClick={() => setMobileOpen(!mobileOpen)} aria-label="Mở menu">
+              {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+          </div>
+        </div>
       </header>
-      <main>{children}</main>
+
+      <main className="main-content">{children}</main>
+
       <footer className="footer">
-        <span>Nhật Ký Của Tôi</span>
-        <span>Giữ điều đẹp đẽ. Học từ quá khứ. Cùng xây dựng ngày mai.</span>
+        <div className="footer-brand">
+          <Sunrise size={18} />
+          <strong>NHẬT KÝ CỦA TÔI</strong>
+        </div>
+        <span>Giữ điều đẹp đẽ • Học từ quá khứ • Cùng xây dựng ngày mai</span>
       </footer>
     </div>
   )
