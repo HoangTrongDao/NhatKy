@@ -226,17 +226,24 @@ export default function MessagesPage() {
         }
         .msg-search-input:focus { border-color: #7c9a6e; }
         .msg-new-btn {
-          padding: 8px 14px;
+          padding: 8px 16px;
           border-radius: 20px;
           border: none;
           background: linear-gradient(135deg, #7c9a6e, #98b88a);
           color: #fff;
-          font-size: 0.8rem;
+          font-size: 0.7rem;
+          font-weight: 800;
+          letter-spacing: 0.8px;
+          text-transform: uppercase;
           cursor: pointer;
           white-space: nowrap;
-          font-weight: 600;
+          box-shadow: 0 3px 12px rgba(124, 154, 110, 0.3);
+          transition: transform 0.18s, box-shadow 0.18s;
         }
-        .msg-new-btn:hover { opacity: 0.9; }
+        .msg-new-btn:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 6px 18px rgba(124, 154, 110, 0.38);
+        }
 
         /* ── Conversation list ── */
         .msg-conv-list {
@@ -268,11 +275,11 @@ export default function MessagesPage() {
         }
         .msg-conv-info { flex: 1; min-width: 0; }
         .msg-conv-name {
-          font-weight: 600; font-size: 0.9rem;
+          font-weight: 700; font-size: 0.9rem;
           color: var(--text, #1a1a1a);
           display: flex; justify-content: space-between; align-items: center;
         }
-        .msg-conv-time { font-size: 0.7rem; color: var(--text-muted, #999); font-weight: 400; }
+        .msg-conv-time { font-size: 0.7rem; color: var(--text-muted, #999); font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; }
         .msg-conv-preview {
           font-size: 0.8rem; color: var(--text-muted, #888);
           white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -308,8 +315,8 @@ export default function MessagesPage() {
           background: none; border: none; cursor: pointer;
           color: var(--text, #1a1a1a); padding: 4px;
         }
-        .msg-chat-header-name { font-weight: 600; font-size: 1rem; color: var(--text, #1a1a1a); }
-        .msg-chat-header-status { font-size: 0.75rem; color: var(--text-muted, #999); }
+        .msg-chat-header-name { font-weight: 700; font-size: 1rem; color: var(--text, #1a1a1a); }
+        .msg-chat-header-status { font-size: 0.7rem; color: var(--text-muted, #999); font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
 
         /* ── Messages ── */
         .msg-messages {
@@ -403,10 +410,14 @@ export default function MessagesPage() {
           cursor: pointer;
           display: flex; align-items: center; justify-content: center;
           flex-shrink: 0;
-          transition: opacity 0.15s;
+          box-shadow: 0 4px 14px rgba(124, 154, 110, 0.35);
+          transition: transform 0.18s, box-shadow 0.18s;
         }
-        .msg-send-btn:disabled { opacity: 0.5; cursor: default; }
-        .msg-send-btn:not(:disabled):hover { opacity: 0.85; }
+        .msg-send-btn:disabled { opacity: 0.5; cursor: default; box-shadow: none; }
+        .msg-send-btn:not(:disabled):hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(124, 154, 110, 0.45);
+        }
 
         /* ── Empty states ── */
         .msg-empty {
@@ -458,7 +469,8 @@ export default function MessagesPage() {
           margin-top: 12px; padding: 8px 16px;
           border-radius: 8px; border: 1px solid var(--border, #ddd);
           background: transparent; cursor: pointer;
-          color: var(--text, #1a1a1a); font-size: 0.85rem;
+          color: var(--text, #1a1a1a); font-size: 0.75rem;
+          font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase;
         }
 
         /* ── Loading ── */
