@@ -1,33 +1,46 @@
-import { useState, useRef, FormEvent, ChangeEvent } from 'react'
+import { useState, useEffect, useRef, FormEvent, ChangeEvent } from 'react'
 import {
   User as UserIcon, KeyRound, Save, Camera, Eye, EyeOff,
   ShieldCheck, Sparkles, Check, ChevronDown, ChevronUp,
-  Image as ImageIcon, Trash2
+  Image as ImageIcon, Trash2, Calendar,
+  X, RotateCcw, Lock, Edit3
 } from 'lucide-react'
-import { User, updateProfile, changePassword } from '../api'
+import { User, updateProfile, changePassword, fetchDashboardStats, DashboardStats } from '../api'
 import { useToast } from './Toast'
 import RequireUser from './RequireUser'
 import PageHeader from './PageHeader'
 
 // Bộ sưu tập avatar bình yên có sẵn
 const PRESET_AVATARS = [
-  { label: 'Hoa đào', emoji: '🌸', color: 'linear-gradient(135deg, #fce4ec, #f8bbd0)' },
-  { label: 'Mầm xanh', emoji: '🌿', color: 'linear-gradient(135deg, #e8f5e9, #c8e6c9)' },
-  { label: 'Ánh dương', emoji: '☀️', color: 'linear-gradient(135deg, #fff9c4, #ffe082)' },
-  { label: 'Bình yên', emoji: '🕊️', color: 'linear-gradient(135deg, #e1f5fe, #b3e5fc)' },
-  { label: 'Tách trà', emoji: '🍵', color: 'linear-gradient(135deg, #f1f8e9, #dcedc8)' },
-  { label: 'Trăng dịu', emoji: '🌙', color: 'linear-gradient(135deg, #ede7f6, #d1c4e9)' },
-  { label: 'Sáng tạo', emoji: '🎨', color: 'linear-gradient(135deg, #fbe9e7, #ffccbc)' },
-  { label: 'Mèo con', emoji: '🐱', color: 'linear-gradient(135deg, #fff3e0, #ffe0b2)' },
-  { label: 'Hoa hướng dương', emoji: '🌻', color: 'linear-gradient(135deg, #fffde7, #fff59d)' },
-  { label: 'Biển êm', emoji: '🌊', color: 'linear-gradient(135deg, #e0f2f1, #b2dfdb)' },
+  { label: 'Hoa đào', emoji: '🌸', color: '#fce4ec' },
+  { label: 'Mầm xanh', emoji: '🌿', color: '#e8f5e9' },
+  { label: 'Ánh dương', emoji: '☀️', color: '#fff9c4' },
+  { label: 'Bình yên', emoji: '🕊️', color: '#e1f5fe' },
+  { label: 'Tách trà', emoji: '🍵', color: '#f1f8e9' },
+  { label: 'Trăng dịu', emoji: '🌙', color: '#ede7f6' },
+  { label: 'Sáng tạo', emoji: '🎨', color: '#fbe9e7' },
+  { label: 'Mèo con', emoji: '🐱', color: '#fff3e0' },
+  { label: 'Hoa hướng dương', emoji: '🌻', color: '#fffde7' },
+  { label: 'Biển êm', emoji: '🌊', color: '#e0f2f1' },
+  { label: 'Cánh diều', emoji: '🪁', color: '#f3e5f5' },
+  { label: 'Ngôi sao', emoji: '⭐', color: '#fff8e1' },
 ]
 
 function maskEmail(email: string): string {
   if (!email || !email.includes('@')) return '••••••••'
   const [name, domain] = email.split('@')
   if (name.length <= 2) return `${name[0]}***@${domain}`
-  return `${name.slice(0, 2)}***${name.slice(-1)}@${domain}`
+  return `${name.slice(0, 2)}••••${name.slice(-1)}@${domain}`
+}
+
+function formatDate(isoStr?: string): string {
+  if (!isoStr) return ''
+  try {
+    const d = new Date(isoStr)
+    return `Tháng ${d.getMonth() + 1}/${d.getFullYear()}`
+  } catch {
+    return ''
+  }
 }
 
 export default function ProfilePage({ user, onUserUpdate }: { user: User | null; onUserUpdate: (u: User) => void }) {
@@ -35,6 +48,7 @@ export default function ProfilePage({ user, onUserUpdate }: { user: User | null;
   const [bio, setBio] = useState(user?.bio || '')
   const [avatarUrl, setAvatarUrl] = useState(user?.avatar_url || '')
   const [savingProfile, setSavingProfile] = useState(false)
+  const [stats, setStats] = useState<DashboardStats | null>(null)
 
   // Ẩn/hiện email
   const [showEmail, setShowEmail] = useState(false)
@@ -42,7 +56,7 @@ export default function ProfilePage({ user, onUserUpdate }: { user: User | null;
   // Ẩn/hiện phần bảo mật (mặc định ẩn)
   const [showSecurity, setShowSecurity] = useState(false)
 
-  // Mở bộ chọn avatar
+  // Modal chọn avatar
   const [showAvatarPicker, setShowAvatarPicker] = useState(false)
 
   // Mật khẩu
@@ -51,17 +65,44 @@ export default function ProfilePage({ user, onUserUpdate }: { user: User | null;
   const [confirmPw, setConfirmPw] = useState('')
   const [savingPw, setSavingPw] = useState(false)
   const [pwError, setPwError] = useState('')
+  const [showCurrentPw, setShowCurrentPw] = useState(false)
+  const [showNewPw, setShowNewPw] = useState(false)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
   const { addToast } = useToast()
 
-  // Xử lý tải ảnh từ máy tính (nén nhẹ dưới dạng data URL)
+  // Kiểm tra xem form có đang bị sửa đổi không
+  const isDirty = displayName !== (user?.display_name || '') ||
+                  bio !== (user?.bio || '') ||
+                  avatarUrl !== (user?.avatar_url || '')
+
+  useEffect(() => {
+    if (user) {
+      setDisplayName(user.display_name || '')
+      setBio(user.bio || '')
+      setAvatarUrl(user.avatar_url || '')
+      fetchDashboardStats()
+        .then(setStats)
+        .catch(() => {})
+    }
+  }, [user])
+
+  function handleReset() {
+    if (user) {
+      setDisplayName(user.display_name || '')
+      setBio(user.bio || '')
+      setAvatarUrl(user.avatar_url || '')
+      addToast('Đã khôi phục thông tin ban đầu.', 'info')
+    }
+  }
+
+  // Xử lý tải ảnh từ máy tính (nén nhẹ dưới dạng data URL JPEG)
   function handleFileUpload(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
 
-    if (file.size > 2 * 1024 * 1024) {
-      addToast('Vui lòng chọn ảnh có kích thước dưới 2MB.', 'error')
+    if (file.size > 3 * 1024 * 1024) {
+      addToast('Vui lòng chọn ảnh có kích thước dưới 3MB.', 'error')
       return
     }
 
@@ -69,7 +110,6 @@ export default function ProfilePage({ user, onUserUpdate }: { user: User | null;
     reader.onload = (event) => {
       const img = new Image()
       img.onload = () => {
-        // Nén ảnh bằng Canvas để tối ưu kích thước
         const canvas = document.createElement('canvas')
         const MAX_SIZE = 240
         let width = img.width
@@ -94,7 +134,7 @@ export default function ProfilePage({ user, onUserUpdate }: { user: User | null;
         const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.85)
         setAvatarUrl(compressedDataUrl)
         setShowAvatarPicker(false)
-        addToast('Đã tải ảnh lên! Nhấn "Lưu thay đổi" để cập nhật.', 'info')
+        addToast('Đã chọn ảnh mới! Nhớ nhấn "Lưu Thay Đổi" để hoàn tất.', 'info')
       }
       img.src = event.target?.result as string
     }
@@ -103,16 +143,16 @@ export default function ProfilePage({ user, onUserUpdate }: { user: User | null;
 
   // Chọn avatar preset
   function selectPreset(emoji: string, color: string) {
-    // Tạo SVG data URL hình emoji xinh xắn
     const svg = `
       <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
-        <rect width="128" height="128" rx="64" fill="${color.includes('#') ? '#fcedf0' : '#fcedf0'}"/>
+        <rect width="128" height="128" rx="64" fill="${color}"/>
         <text x="64" y="78" font-size="64" text-anchor="middle" font-family="Apple Color Emoji, Segoe UI Emoji, sans-serif">${emoji}</text>
       </svg>
     `.trim()
     const dataUrl = `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`
     setAvatarUrl(dataUrl)
     setShowAvatarPicker(false)
+    addToast(`Đã chọn biểu tượng ${emoji}! Nhấn "Lưu Thay Đổi" để cập nhật.`, 'info')
   }
 
   async function handleProfileSave(e: FormEvent) {
@@ -137,11 +177,11 @@ export default function ProfilePage({ user, onUserUpdate }: { user: User | null;
     e.preventDefault()
     setPwError('')
     if (newPw !== confirmPw) {
-      setPwError('Mật khẩu mới không khớp.')
+      setPwError('Mật khẩu mới không trùng khớp.')
       return
     }
     if (newPw.length < 8) {
-      setPwError('Mật khẩu mới cần ít nhất 8 ký tự.')
+      setPwError('Mật khẩu mới cần tối thiểu 8 ký tự.')
       return
     }
     setSavingPw(true)
@@ -151,9 +191,9 @@ export default function ProfilePage({ user, onUserUpdate }: { user: User | null;
       setNewPw('')
       setConfirmPw('')
       setShowSecurity(false)
-      addToast('Mật khẩu đã được đổi thành công!', 'success')
+      addToast('Đổi mật khẩu thành công! Tài khoản của bạn luôn được bảo vệ an toàn.', 'success')
     } catch (err) {
-      setPwError(err instanceof Error ? err.message : 'Không đổi được mật khẩu.')
+      setPwError(err instanceof Error ? err.message : 'Không đổi được mật khẩu. Vui lòng kiểm tra lại mật khẩu hiện tại.')
     } finally {
       setSavingPw(false)
     }
@@ -165,278 +205,457 @@ export default function ProfilePage({ user, onUserUpdate }: { user: User | null;
         <PageHeader
           eyebrow="KHÔNG GIAN RIÊNG TƯ"
           title="Không gian riêng tư của bạn."
-          description="Nơi bình yên để thể hiện cá tính, chăm sóc tâm hồn và quản lý danh tính của riêng bạn."
+          description="Nơi bình yên để thể hiện bản sắc, chăm sóc tâm hồn và quản lý danh tính của riêng bạn."
           icon={<UserIcon size={26} />}
         />
 
-        <div className="profile-layout-wrap">
-          {/* ── CARD 1: DANH TÍNH CÁ NHÂN & CHỈNH SỬA TÊN, ẢNH ── */}
-          <form className="profile-main-card" onSubmit={handleProfileSave}>
-            <div className="profile-header-banner">
-              <div className="profile-avatar-wrapper">
-                <div className="profile-avatar-display">
-                  {avatarUrl ? (
-                    <img src={avatarUrl} alt="Avatar" className="avatar-img-circle" />
-                  ) : (
-                    <div className="avatar-initials">
-                      {displayName ? displayName.charAt(0).toUpperCase() : 'U'}
-                    </div>
-                  )}
-                </div>
+        <div className="profile-dashboard-layout">
+          {/* ══════════════════════════════════════════════════════
+              CỘT TRÁI: THẺ DANH TÍNH CÁ NHÂN & CỘT MỐC ĐỒNG HÀNH
+              ══════════════════════════════════════════════════════ */}
+          <aside className="profile-identity-card">
+            {/* Banner nghệ thuật ấm áp */}
+            <div className="profile-cover-banner">
+              <span className="cover-badge">
+                <Sparkles size={13} /> Thành viên New Beginning
+              </span>
+            </div>
 
+            {/* Khung avatar trung tâm với nút đổi ảnh */}
+            <div className="profile-avatar-center-wrap">
+              <div
+                className="profile-avatar-circle"
+                onClick={() => setShowAvatarPicker(true)}
+                title="Nhấn để đổi ảnh đại diện"
+              >
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt="Avatar" className="avatar-img-circle" />
+                ) : (
+                  <div className="avatar-initials">
+                    {displayName ? displayName.charAt(0).toUpperCase() : 'U'}
+                  </div>
+                )}
+                <div className="avatar-hover-overlay">
+                  <Camera size={20} />
+                  <span>Đổi ảnh</span>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                className="btn-trigger-picker"
+                onClick={() => setShowAvatarPicker(true)}
+              >
+                <Camera size={14} />
+                <span>Đổi ảnh đại diện</span>
+              </button>
+            </div>
+
+            {/* Thông tin tên & tiểu sử tóm tắt */}
+            <div className="identity-text-meta">
+              <h2 className="identity-name">{displayName || 'Chưa đặt tên'}</h2>
+              {bio ? (
+                <p className="identity-bio">"{bio}"</p>
+              ) : (
+                <p className="identity-bio-empty">Chưa có lời tự nhủ hay châm ngôn sống...</p>
+              )}
+            </div>
+
+            {/* Thẻ Gmail được ẩn & bảo mật an toàn */}
+            <div className="identity-private-email-box">
+              <div className="email-box-header">
+                <div className="email-box-title">
+                  <ShieldCheck size={16} className="shield-icon" />
+                  <span>GMAIL ĐĂNG KÝ (BẢO MẬT)</span>
+                </div>
                 <button
                   type="button"
-                  className="avatar-change-btn"
-                  onClick={() => setShowAvatarPicker(!showAvatarPicker)}
-                  title="Đổi ảnh đại diện"
+                  className="btn-email-toggle"
+                  onClick={() => setShowEmail(!showEmail)}
+                  title={showEmail ? 'Ẩn địa chỉ email' : 'Hiện địa chỉ email'}
                 >
-                  <Camera size={16} />
-                  <span>Đổi ảnh</span>
+                  {showEmail ? <EyeOff size={14} /> : <Eye size={14} />}
+                  <span>{showEmail ? 'Ẩn' : 'Hiện'}</span>
                 </button>
               </div>
 
-              <div className="profile-summary-info">
-                <div className="profile-name-row">
-                  <h2>{displayName || 'Chưa đặt tên'}</h2>
-                  <span className="profile-status-badge">
-                    <Sparkles size={13} /> Thành viên New Beginning
+              <div className="email-box-value">
+                <code>{showEmail ? user?.email : maskEmail(user?.email || '')}</code>
+              </div>
+
+              <p className="email-box-notice">
+                🔒 Địa chỉ này được ẩn bảo mật, không bao giờ hiển thị công khai.
+              </p>
+            </div>
+
+            {/* Cột mốc & thành tựu đồng hành */}
+            <div className="identity-milestones-card">
+              <div className="milestone-title">
+                <Calendar size={15} />
+                <span>Hành trình cá nhân</span>
+              </div>
+
+              <div className="milestone-stats-row">
+                <div className="mini-stat-item">
+                  <span className="mini-stat-num">{stats?.days_since_joined ?? 1}</span>
+                  <span className="mini-stat-label">Ngày gắn bó</span>
+                </div>
+                <div className="mini-stat-item">
+                  <span className="mini-stat-num">{stats?.total_memories ?? 0}</span>
+                  <span className="mini-stat-label">Kỷ niệm</span>
+                </div>
+                <div className="mini-stat-item">
+                  <span className="mini-stat-num">{stats?.total_goals ?? 0}</span>
+                  <span className="mini-stat-label">Mục tiêu</span>
+                </div>
+                <div className="mini-stat-item">
+                  <span className="mini-stat-num">{stats?.total_reflections ?? 0}</span>
+                  <span className="mini-stat-label">Chiêm nghiệm</span>
+                </div>
+              </div>
+
+              {user?.created_at && (
+                <div className="milestone-footer">
+                  <span>Gia nhập từ {formatDate(user.created_at)}</span>
+                </div>
+              )}
+            </div>
+          </aside>
+
+          {/* ══════════════════════════════════════════════════════
+              CỘT PHẢI: FORM CHỈNH SỬA & KHU VỰC BẢO MẬT GỌN GÀNG
+              ══════════════════════════════════════════════════════ */}
+          <main className="profile-main-content">
+            {/* Form chỉnh sửa tên & tiểu sử */}
+            <form className="profile-edit-section-card" onSubmit={handleProfileSave}>
+              <div className="card-section-header">
+                <div>
+                  <span className="section-eyebrow">
+                    <Edit3 size={14} /> CHỈNH SỬA HỒ SƠ
+                  </span>
+                  <h3 className="section-title">Thông tin & Diện mạo của bạn</h3>
+                </div>
+                {isDirty && (
+                  <span className="badge-modified-pill">Có thay đổi chưa lưu</span>
+                )}
+              </div>
+
+              <div className="form-fields-stack">
+                {/* Tên hiển thị */}
+                <div className="enhanced-form-group">
+                  <label className="enhanced-field-label">
+                    <span className="label-with-icon">
+                      <UserIcon size={16} /> Tên hiển thị của bạn
+                    </span>
+                    <span className="char-badge">{displayName.length}/80</span>
+                  </label>
+                  <input
+                    type="text"
+                    className="enhanced-input"
+                    value={displayName}
+                    onChange={e => setDisplayName(e.target.value)}
+                    required
+                    minLength={1}
+                    maxLength={80}
+                    placeholder="Nhập tên gọi thân thương của bạn..."
+                  />
+                  <span className="enhanced-hint">
+                    Tên này xuất hiện trên thanh điều hướng, các bài viết chia sẻ và cuộc trò chuyện với bạn bè.
                   </span>
                 </div>
 
-                {/* ── ẨN GMAIL TẠO TÀI KHOẢN AN TOÀN ── */}
-                <div className="private-email-pill">
-                  <div className="email-meta-left">
-                    <ShieldCheck size={16} className="shield-icon" />
-                    <div>
-                      <span className="email-meta-title">Gmail đăng ký (Riêng tư)</span>
-                      <strong className="email-meta-addr">
-                        {showEmail ? user?.email : maskEmail(user?.email || '')}
-                      </strong>
+                {/* Tiểu sử */}
+                <div className="enhanced-form-group">
+                  <label className="enhanced-field-label">
+                    <span className="label-with-icon">
+                      <Sparkles size={16} /> Vài dòng về bản thân (Tiểu sử)
+                    </span>
+                    <span className="char-badge">{bio.length}/500</span>
+                  </label>
+                  <textarea
+                    className="enhanced-textarea"
+                    value={bio}
+                    onChange={e => setBio(e.target.value)}
+                    rows={4}
+                    maxLength={500}
+                    placeholder="Viết một lời tự nhủ, câu châm ngôn bạn yêu thích hoặc điều bạn đang hướng tới..."
+                  />
+                  <span className="enhanced-hint">
+                    Không bắt buộc. Hãy viết những điều mang lại cho bạn sự an yên và động lực.
+                  </span>
+                </div>
+
+                {/* Xem trước diện mạo trực quan */}
+                <div className="live-preview-box">
+                  <span className="preview-label">Xem trước giao diện khi người khác thấy bạn:</span>
+                  <div className="preview-card-inner">
+                    <div className="preview-avatar">
+                      {avatarUrl ? (
+                        <img src={avatarUrl} alt="" className="avatar-img-circle" />
+                      ) : (
+                        <span>{displayName ? displayName.charAt(0).toUpperCase() : 'U'}</span>
+                      )}
+                    </div>
+                    <div className="preview-info">
+                      <div className="preview-name">{displayName || 'Chưa đặt tên'}</div>
+                      <div className="preview-bio">{bio || 'Chưa có tiểu sử cá nhân'}</div>
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    className="email-toggle-btn"
-                    onClick={() => setShowEmail(!showEmail)}
-                    title={showEmail ? 'Ẩn địa chỉ Gmail' : 'Hiển thị địa chỉ Gmail'}
-                  >
-                    {showEmail ? <EyeOff size={15} /> : <Eye size={15} />}
-                    <span>{showEmail ? 'Ẩn' : 'Hiện'}</span>
-                  </button>
                 </div>
 
-                <p className="privacy-guarantee-note">
-                  🔒 Địa chỉ email của bạn được bảo mật tuyệt đối, chỉ dùng để đăng nhập và không bao giờ hiển thị công khai.
-                </p>
-              </div>
-            </div>
-
-            {/* ── BỘ CHỌN ẢNH ĐẠI DIỆN ── */}
-            {showAvatarPicker && (
-              <div className="avatar-picker-panel">
-                <div className="picker-header">
-                  <div>
-                    <h4>Chọn ảnh đại diện của bạn</h4>
-                    <p>Tải ảnh từ máy tính hoặc chọn biểu tượng tâm hồn bình yên</p>
-                  </div>
-                  <button
-                    type="button"
-                    className="btn-close-picker"
-                    onClick={() => setShowAvatarPicker(false)}
-                  >
-                    ✕
-                  </button>
-                </div>
-
-                <div className="picker-upload-row">
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    style={{ display: 'none' }}
-                    onChange={handleFileUpload}
-                  />
-                  <button
-                    type="button"
-                    className="btn-upload-file"
-                    onClick={() => fileInputRef.current?.click()}
-                  >
-                    <ImageIcon size={18} />
-                    <span>Tải ảnh từ máy tính của bạn</span>
-                  </button>
-
-                  {avatarUrl && (
+                {/* Hàng nút hành động dạng nổi */}
+                <div className="enhanced-actions-bar">
+                  {isDirty && (
                     <button
                       type="button"
-                      className="btn-remove-avatar"
-                      onClick={() => setAvatarUrl('')}
-                      title="Quay về chữ cái đầu"
+                      className="button secondary btn-reset-changes"
+                      onClick={handleReset}
+                      disabled={savingProfile}
                     >
-                      <Trash2 size={16} />
-                      <span>Xóa ảnh</span>
+                      <RotateCcw size={16} />
+                      <span>Khôi phục</span>
                     </button>
                   )}
-                </div>
 
-                <div className="preset-grid-title">Hoặc chọn biểu tượng yêu thích:</div>
-                <div className="preset-avatar-grid">
+                  <button
+                    type="submit"
+                    className="button primary btn-floating-save"
+                    disabled={savingProfile}
+                  >
+                    <Save size={18} />
+                    <span>{savingProfile ? 'Đang lưu...' : 'Lưu Thay Đổi'}</span>
+                  </button>
+                </div>
+              </div>
+            </form>
+
+            {/* ── MỤC BẢO MẬT & ĐỔI MẬT KHẨU ĐƯỢC ẨN GỌN GÀNG (ACCORDION) ── */}
+            <div className="security-accordion-wrapper">
+              <button
+                type="button"
+                className="security-toggle-header-btn"
+                onClick={() => setShowSecurity(!showSecurity)}
+                aria-expanded={showSecurity}
+              >
+                <div className="sec-btn-left">
+                  <div className="sec-icon-circle-v2">
+                    <Lock size={18} />
+                  </div>
+                  <div>
+                    <strong className="sec-title-text">Cài đặt bảo mật & Đổi mật khẩu</strong>
+                    <span className="sec-subtitle-text">
+                      {showSecurity
+                        ? 'Nhấn để thu gọn lại'
+                        : 'Mục bảo mật được ẩn để giữ không gian riêng tư luôn thanh thoát, nhẹ nhàng'}
+                    </span>
+                  </div>
+                </div>
+                <div className="sec-btn-arrow">
+                  {showSecurity ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                </div>
+              </button>
+
+              {showSecurity && (
+                <form className="security-drawer-content" onSubmit={handlePasswordChange}>
+                  <p className="security-intro-text">
+                    Mật khẩu của bạn được mã hóa an toàn một chiều. Chỉ đổi mật khẩu khi bạn thực sự cần thiết hoặc nghi ngờ tài khoản bị lộ.
+                  </p>
+
+                  <div className="security-fields-stack">
+                    <div className="enhanced-form-group">
+                      <label className="enhanced-field-label">
+                        <span className="label-with-icon">
+                          <KeyRound size={15} /> Mật khẩu hiện tại
+                        </span>
+                      </label>
+                      <div className="input-with-eye-wrap">
+                        <input
+                          type={showCurrentPw ? 'text' : 'password'}
+                          className="enhanced-input"
+                          value={currentPw}
+                          onChange={e => setCurrentPw(e.target.value)}
+                          required
+                          placeholder="Nhập mật khẩu bạn đang dùng"
+                        />
+                        <button
+                          type="button"
+                          className="btn-eye-inner"
+                          onClick={() => setShowCurrentPw(!showCurrentPw)}
+                        >
+                          {showCurrentPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="security-two-cols">
+                      <div className="enhanced-form-group">
+                        <label className="enhanced-field-label">
+                          <span className="label-with-icon">
+                            <Lock size={15} /> Mật khẩu mới
+                          </span>
+                        </label>
+                        <div className="input-with-eye-wrap">
+                          <input
+                            type={showNewPw ? 'text' : 'password'}
+                            className="enhanced-input"
+                            value={newPw}
+                            onChange={e => setNewPw(e.target.value)}
+                            required
+                            minLength={8}
+                            maxLength={128}
+                            placeholder="Tối thiểu 8 ký tự"
+                          />
+                          <button
+                            type="button"
+                            className="btn-eye-inner"
+                            onClick={() => setShowNewPw(!showNewPw)}
+                          >
+                            {showNewPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="enhanced-form-group">
+                        <label className="enhanced-field-label">
+                          <span className="label-with-icon">
+                            <Check size={15} /> Nhập lại mật khẩu mới
+                          </span>
+                        </label>
+                        <input
+                          type="password"
+                          className="enhanced-input"
+                          value={confirmPw}
+                          onChange={e => setConfirmPw(e.target.value)}
+                          required
+                          minLength={8}
+                          maxLength={128}
+                          placeholder="Xác nhận lại mật khẩu mới"
+                        />
+                      </div>
+                    </div>
+
+                    {pwError && <div className="error-alert-box">{pwError}</div>}
+
+                    <div className="security-actions-row">
+                      <button
+                        type="submit"
+                        className="button primary btn-confirm-pw"
+                        disabled={savingPw}
+                      >
+                        <Check size={18} />
+                        <span>{savingPw ? 'Đang cập nhật...' : 'Xác Nhận Đổi Mật Khẩu'}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        className="button secondary"
+                        onClick={() => {
+                          setShowSecurity(false)
+                          setPwError('')
+                          setCurrentPw('')
+                          setNewPw('')
+                          setConfirmPw('')
+                        }}
+                      >
+                        Thu gọn lại
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              )}
+            </div>
+          </main>
+        </div>
+
+        {/* ══════════════════════════════════════════════════════
+            MODAL CHỌN ẢNH ĐẠI DIỆN HIỆN ĐẠI (POPUP DIALOG)
+            ══════════════════════════════════════════════════════ */}
+        {showAvatarPicker && (
+          <div className="avatar-modal-backdrop" onClick={() => setShowAvatarPicker(false)}>
+            <div className="avatar-modal-card" onClick={e => e.stopPropagation()}>
+              <div className="modal-top-bar">
+                <div className="modal-title-group">
+                  <div className="modal-icon-badge">
+                    <Camera size={18} />
+                  </div>
+                  <div>
+                    <h4>Chọn ảnh đại diện của bạn</h4>
+                    <p>Tải ảnh cá nhân từ máy hoặc chọn linh vật tâm hồn</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="btn-modal-close"
+                  onClick={() => setShowAvatarPicker(false)}
+                  title="Đóng hộp thoại"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* Lựa chọn 1: Tải từ máy tính */}
+              <div className="modal-upload-section">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  style={{ display: 'none' }}
+                  onChange={handleFileUpload}
+                />
+                <button
+                  type="button"
+                  className="btn-upload-box"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <div className="upload-box-icon">
+                    <ImageIcon size={28} />
+                  </div>
+                  <div className="upload-box-text">
+                    <strong>Tải ảnh lên từ máy tính</strong>
+                    <span>Hỗ trợ JPG, PNG (tối đa 3MB, tự động tối ưu hóa)</span>
+                  </div>
+                </button>
+
+                {avatarUrl && (
+                  <button
+                    type="button"
+                    className="btn-remove-avatar-modal"
+                    onClick={() => {
+                      setAvatarUrl('')
+                      setShowAvatarPicker(false)
+                      addToast('Đã xóa ảnh tùy chỉnh. Nhớ nhấn "Lưu Thay Đổi".', 'info')
+                    }}
+                  >
+                    <Trash2 size={16} />
+                    <span>Xóa ảnh hiện tại</span>
+                  </button>
+                )}
+              </div>
+
+              {/* Lựa chọn 2: Biểu tượng cảm xúc có sẵn */}
+              <div className="modal-preset-section">
+                <div className="preset-section-header">
+                  <span>Hoặc chọn biểu tượng tâm hồn yêu thích:</span>
+                </div>
+                <div className="modal-presets-grid">
                   {PRESET_AVATARS.map((p, idx) => (
                     <button
                       key={idx}
                       type="button"
-                      className="preset-avatar-btn"
+                      className="preset-circle-btn"
+                      style={{ background: p.color }}
                       onClick={() => selectPreset(p.emoji, p.color)}
                       title={p.label}
                     >
-                      <span className="preset-emoji">{p.emoji}</span>
-                      <span className="preset-label">{p.label}</span>
+                      <span className="preset-emoji-icon">{p.emoji}</span>
+                      <span className="preset-tooltip">{p.label}</span>
                     </button>
                   ))}
                 </div>
               </div>
-            )}
-
-            {/* ── FORM CHỈNH SỬA TÊN & TIỂU SỬ ── */}
-            <div className="profile-edit-fields">
-              <div className="form-group-card">
-                <label className="field-label">
-                  <span>Tên hiển thị của bạn</span>
-                  <span className="char-count">{displayName.length}/80</span>
-                </label>
-                <input
-                  type="text"
-                  className="custom-text-input"
-                  value={displayName}
-                  onChange={e => setDisplayName(e.target.value)}
-                  required
-                  minLength={1}
-                  maxLength={80}
-                  placeholder="Nhập tên bạn muốn mọi người gọi..."
-                />
-                <small className="field-hint-text">
-                  Tên này sẽ hiển thị trên thanh điều hướng, các kỷ niệm chia sẻ và tin nhắn với bạn bè.
-                </small>
-              </div>
-
-              <div className="form-group-card">
-                <label className="field-label">
-                  <span>Vài dòng về bản thân (Tiểu sử)</span>
-                  <span className="char-count">{bio.length}/500</span>
-                </label>
-                <textarea
-                  className="custom-textarea"
-                  value={bio}
-                  onChange={e => setBio(e.target.value)}
-                  rows={4}
-                  maxLength={500}
-                  placeholder="Ghi lại một châm ngôn sống, điều bạn trân trọng hoặc lời tự nhủ với bản thân..."
-                />
-                <small className="field-hint-text">
-                  Không bắt buộc. Bạn có thể cập nhật bất cứ lúc nào.
-                </small>
-              </div>
-
-              <div className="profile-actions-bar">
-                <button
-                  type="submit"
-                  className="button primary btn-save-profile"
-                  disabled={savingProfile}
-                >
-                  <Save size={18} />
-                  <span>{savingProfile ? 'Đang lưu thông tin...' : 'Lưu Thay Đổi'}</span>
-                </button>
-              </div>
             </div>
-          </form>
-
-          {/* ── CARD 2: PHẦN BẢO MẬT ĐÃ ĐƯỢC ẨN GỌN GÀNG (TOGGLE) ── */}
-          <div className="security-collapsed-card">
-            <button
-              type="button"
-              className="security-accordion-btn"
-              onClick={() => setShowSecurity(!showSecurity)}
-            >
-              <div className="accordion-left">
-                <div className="sec-icon-circle">
-                  <KeyRound size={20} />
-                </div>
-                <div>
-                  <strong>Cài đặt bảo mật & Đổi mật khẩu</strong>
-                  <span>{showSecurity ? 'Nhấn để thu gọn lại' : 'Mục bảo mật được ẩn để giữ không gian riêng tư nhẹ nhàng'}</span>
-                </div>
-              </div>
-              <div className="accordion-arrow">
-                {showSecurity ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-              </div>
-            </button>
-
-            {showSecurity && (
-              <form className="security-form-drawer" onSubmit={handlePasswordChange}>
-                <div className="drawer-inner-grid">
-                  <label className="form-group-card">
-                    <span className="field-label">Mật khẩu hiện tại</span>
-                    <input
-                      type="password"
-                      className="custom-text-input"
-                      value={currentPw}
-                      onChange={e => setCurrentPw(e.target.value)}
-                      required
-                      placeholder="Nhập mật khẩu hiện tại của bạn"
-                    />
-                  </label>
-
-                  <label className="form-group-card">
-                    <span className="field-label">Mật khẩu mới</span>
-                    <input
-                      type="password"
-                      className="custom-text-input"
-                      value={newPw}
-                      onChange={e => setNewPw(e.target.value)}
-                      required
-                      minLength={8}
-                      maxLength={128}
-                      placeholder="Ít nhất 8 ký tự an toàn"
-                    />
-                  </label>
-
-                  <label className="form-group-card">
-                    <span className="field-label">Xác nhận mật khẩu mới</span>
-                    <input
-                      type="password"
-                      className="custom-text-input"
-                      value={confirmPw}
-                      onChange={e => setConfirmPw(e.target.value)}
-                      required
-                      minLength={8}
-                      maxLength={128}
-                      placeholder="Nhập lại chính xác mật khẩu mới"
-                    />
-                  </label>
-                </div>
-
-                {pwError && <p className="error-message" style={{ marginTop: 12 }}>{pwError}</p>}
-
-                <div className="security-drawer-actions">
-                  <button
-                    type="submit"
-                    className="button primary btn-save-pw"
-                    disabled={savingPw}
-                  >
-                    <Check size={18} />
-                    <span>{savingPw ? 'Đang cập nhật mật khẩu...' : 'Xác Nhận Đổi Mật Khẩu'}</span>
-                  </button>
-                  <button
-                    type="button"
-                    className="button secondary"
-                    onClick={() => { setShowSecurity(false); setPwError(''); }}
-                  >
-                    Hủy bỏ
-                  </button>
-                </div>
-              </form>
-            )}
           </div>
-        </div>
+        )}
       </div>
     </RequireUser>
   )
