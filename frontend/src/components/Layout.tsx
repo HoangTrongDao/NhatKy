@@ -112,7 +112,12 @@ export default function Layout({ user, setUser, children }: LayoutProps) {
               {user ? (
                 <>
                   <NavLink to="/profile" className="mobile-profile-link" onClick={() => setMobileOpen(false)}>
-                    <UserIcon size={16} /> Hồ sơ cá nhân ({user.display_name})
+                    {user.avatar_url ? (
+                      <img src={user.avatar_url} alt="" style={{ width: 22, height: 22, borderRadius: '50%', objectFit: 'cover' }} />
+                    ) : (
+                      <UserIcon size={16} />
+                    )}
+                    <span>Không gian riêng ({user.display_name})</span>
                   </NavLink>
                   <button className="mobile-logout-btn" onClick={() => { signOut(); setMobileOpen(false); }}>
                     <LogOut size={16} /> Đăng xuất
@@ -136,7 +141,11 @@ export default function Layout({ user, setUser, children }: LayoutProps) {
               <div className="user-action-group">
                 <Link to="/profile" className="user-pill" title="Xem hồ sơ">
                   <span className="user-pill-avatar">
-                    {user.display_name.charAt(0).toUpperCase()}
+                    {user.avatar_url ? (
+                      <img src={user.avatar_url} alt="" className="user-pill-avatar-img" />
+                    ) : (
+                      user.display_name.charAt(0).toUpperCase()
+                    )}
                   </span>
                   <span className="user-pill-name">{user.display_name}</span>
                 </Link>

@@ -20,7 +20,11 @@ function Dashboard({ user }: { user: User }) {
         <div className="dash-hero-left">
           <div className="dash-user-badge">
             <div className="dash-avatar-large">
-              {user.display_name.charAt(0).toUpperCase()}
+              {user.avatar_url ? (
+                <img src={user.avatar_url} alt={user.display_name} className="dash-avatar-img" />
+              ) : (
+                user.display_name.charAt(0).toUpperCase()
+              )}
             </div>
             <div>
               <span className="eyebrow-chip"><Sparkles size={13} /> KHÔNG GIAN BÌNH YÊN</span>
