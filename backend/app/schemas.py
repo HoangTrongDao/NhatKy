@@ -12,16 +12,16 @@ class UserOut(BaseModel):
     id: int
     email: EmailStr
     display_name: str
-    bio: str = ""
-    avatar_url: str = ""
+    bio: str | None = ""
+    avatar_url: str | None = ""
     created_at: datetime
 
 class UserPublicOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: int
     display_name: str
-    bio: str = ""
-    avatar_url: str = ""
+    bio: str | None = ""
+    avatar_url: str | None = ""
     created_at: datetime
 
 class TokenOut(BaseModel):
@@ -62,7 +62,7 @@ class MemoryOut(BaseModel):
     title: str
     content: str
     image_url: str | None = None
-    occurred_at: date | None
+    occurred_at: date | None = None
     visibility: str
     created_at: datetime
     updated_at: datetime | None = None

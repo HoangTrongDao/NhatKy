@@ -8,7 +8,7 @@ echo.
 set ROOT_DIR=%~dp0
 
 echo [1/3] Đang khởi động Backend (FastAPI)...
-start "New Beginning Backend" cmd /k "cd /d "%ROOT_DIR%backend" && if exist .venv\Scripts\activate.bat (call .venv\Scripts\activate.bat) else (py -m venv .venv && call .venv\Scripts\activate.bat && pip install -r requirements.txt) && uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload"
+start "New Beginning Backend" cmd /k "cd /d "%ROOT_DIR%backend" && if exist .venv\Scripts\activate.bat (call .venv\Scripts\activate.bat) else (py -m venv .venv && call .venv\Scripts\activate.bat && pip install -r requirements.txt) && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
 
 echo [2/3] Đang khởi động Frontend (Vite + React)...
 start "New Beginning Frontend" cmd /k "cd /d "%ROOT_DIR%frontend" && if not exist node_modules (npm install) && npm run dev"

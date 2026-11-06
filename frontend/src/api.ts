@@ -13,11 +13,19 @@ export async function api<T>(path: string, options: RequestInit = {}): Promise<T
     headers.set('Content-Type', 'application/json')
   }
   if (token) headers.set('Authorization', `Bearer ${token}`)
-  const response = await fetch(`${API_BASE}${path}`, { ...options, headers })
-  if (response.status === 204) return undefined as T
-  const body = await response.json().catch(() => ({}))
-  if (!response.ok) throw new Error(body.detail || 'Có lỗi xảy ra. Vui lòng thử lại.')
-  return body as T
+
+  try {
+    const response = await fetch(`${API_BASE}${path}`, { ...options, headers })
+    if (response.status === 204) return undefined as T
+    const body = await response.json().catch(() => ({}))
+    if (!response.ok) throw new Error(body.detail || 'Có lỗi xảy ra. Vui lòng thử lại.')
+    return body as T
+  } catch (err) {
+    if (err instanceof TypeError && err.message.toLowerCase().includes('fetch')) {
+      throw new Error('Không thể kết nối đến máy chủ API (Failed to fetch). Vui lòng kiểm tra dịch vụ backend đang chạy.')
+    }
+    throw err
+  }
 }
 
 /* ── Types ── */
