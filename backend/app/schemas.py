@@ -13,6 +13,7 @@ class UserOut(BaseModel):
     email: EmailStr
     display_name: str
     bio: str = ""
+    avatar_url: str = ""
     created_at: datetime
 
 class TokenOut(BaseModel):
@@ -22,6 +23,7 @@ class TokenOut(BaseModel):
 class ProfileUpdate(BaseModel):
     display_name: str | None = Field(default=None, min_length=1, max_length=80)
     bio: str | None = Field(default=None, max_length=500)
+    avatar_url: str | None = None
 
 class ChangePasswordIn(BaseModel):
     current_password: str = Field(min_length=1)

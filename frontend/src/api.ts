@@ -26,6 +26,7 @@ export type User = {
   email: string
   display_name: string
   bio: string
+  avatar_url?: string
   created_at: string
 }
 
@@ -81,6 +82,7 @@ export type DashboardStats = {
 export type ProfileUpdate = {
   display_name?: string
   bio?: string
+  avatar_url?: string
 }
 
 export type ChangePasswordPayload = {

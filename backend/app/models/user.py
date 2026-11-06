@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from sqlalchemy import DateTime, Integer, String
+from sqlalchemy import DateTime, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.session import Base
 
@@ -13,6 +13,7 @@ class User(Base):
     password_hash: Mapped[str] = mapped_column(String(255))
     display_name: Mapped[str] = mapped_column(String(80))
     bio: Mapped[str] = mapped_column(String(500), default="")
+    avatar_url: Mapped[str] = mapped_column(Text, default="", nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     memories = relationship("Memory", back_populates="owner", cascade="all, delete-orphan")
     reflections = relationship("Reflection", back_populates="owner", cascade="all, delete-orphan")

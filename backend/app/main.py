@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.db.session import Base, engine
 from app import models  # noqa: F401 — registers SQLAlchemy models
+from sqlalchemy import text
 from app.api.v1 import (
     auth,
     memories,
@@ -17,6 +18,14 @@ from app.api.v1 import (
 
 # 1. Khởi tạo Base Metadata cho Database trước
 Base.metadata.create_all(bind=engine)
+
+# Đảm bảo trường avatar_url tồn tại nếu database đã có sẵn từ trước
+with engine.connect() as conn:
+    try:
+        conn.execute(text("ALTER TABLE users ADD COLUMN avatar_url TEXT DEFAULT ''"))
+        conn.commit()
+    except Exception:
+        pass
 
 # 2. Khởi tạo FastAPI duy nhất 1 lần với thông tin đầy đủ
 app = FastAPI(
