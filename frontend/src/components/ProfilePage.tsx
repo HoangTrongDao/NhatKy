@@ -111,26 +111,15 @@ export default function ProfilePage({ user, onUserUpdate }: { user: User | null;
       const img = new Image()
       img.onload = () => {
         const canvas = document.createElement('canvas')
-        const MAX_SIZE = 240
-        let width = img.width
-        let height = img.height
-
-        if (width > height) {
-          if (width > MAX_SIZE) {
-            height *= MAX_SIZE / width
-            width = MAX_SIZE
-          }
-        } else {
-          if (height > MAX_SIZE) {
-            width *= MAX_SIZE / height
-            height = MAX_SIZE
-          }
-        }
-
-        canvas.width = width
-        canvas.height = height
+        const SIZE = 240
+        canvas.width = SIZE
+        canvas.height = SIZE
         const ctx = canvas.getContext('2d')
-        ctx?.drawImage(img, 0, 0, width, height)
+        // Cắt vuông ở giữa ảnh để avatar luôn tròn xoe hoàn hảo, không bị méo hay giãn
+        const minDim = Math.min(img.width, img.height)
+        const sx = (img.width - minDim) / 2
+        const sy = (img.height - minDim) / 2
+        ctx?.drawImage(img, sx, sy, minDim, minDim, 0, 0, SIZE, SIZE)
         const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.85)
         setAvatarUrl(compressedDataUrl)
         setShowAvatarPicker(false)

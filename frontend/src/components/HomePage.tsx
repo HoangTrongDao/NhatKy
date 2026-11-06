@@ -21,7 +21,12 @@ function Dashboard({ user }: { user: User }) {
           <div className="dash-user-badge">
             <div className="dash-avatar-large">
               {user.avatar_url ? (
-                <img src={user.avatar_url} alt={user.display_name} className="dash-avatar-img" />
+                <img
+                  src={user.avatar_url}
+                  alt={user.display_name}
+                  className="dash-avatar-img"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit', display: 'block' }}
+                />
               ) : (
                 user.display_name.charAt(0).toUpperCase()
               )}

@@ -142,7 +142,12 @@ export default function Layout({ user, setUser, children }: LayoutProps) {
                 <Link to="/profile" className="user-pill" title="Xem hồ sơ">
                   <span className="user-pill-avatar">
                     {user.avatar_url ? (
-                      <img src={user.avatar_url} alt="" className="user-pill-avatar-img" />
+                      <img
+                        src={user.avatar_url}
+                        alt=""
+                        className="user-pill-avatar-img"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%', display: 'block' }}
+                      />
                     ) : (
                       user.display_name.charAt(0).toUpperCase()
                     )}
