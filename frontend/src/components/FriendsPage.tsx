@@ -115,7 +115,7 @@ export default function FriendsPage() {
     if (!keyword) return friends
 
     return friends.filter(friend =>
-      `${friend.display_name} ${friend.email}`
+      `${friend.display_name} ${friend.bio || ''}`
         .toLowerCase()
         .includes(keyword)
     )
@@ -127,7 +127,7 @@ export default function FriendsPage() {
     if (!keyword) return suggestions
 
     return suggestions.filter(user =>
-      `${user.display_name} ${user.email}`
+      `${user.display_name} ${user.bio || ''}`
         .toLowerCase()
         .includes(keyword)
     )
@@ -139,7 +139,7 @@ export default function FriendsPage() {
     if (!keyword) return requests
 
     return requests.filter(request =>
-      `${request.sender.display_name} ${request.sender.email}`
+      `${request.sender.display_name} ${request.sender.bio || ''}`
         .toLowerCase()
         .includes(keyword)
     )
@@ -151,7 +151,7 @@ export default function FriendsPage() {
     if (!keyword) return sentRequests
 
     return sentRequests.filter(request =>
-      `${request.receiver.display_name} ${request.receiver.email}`
+      `${request.receiver.display_name} ${request.receiver.bio || ''}`
         .toLowerCase()
         .includes(keyword)
     )
@@ -246,20 +246,21 @@ export default function FriendsPage() {
   // ==========================================
 
   function renderUserCard(user: FriendUser, action?: ReactNode) {
-    const avatar = user.display_name?.trim().charAt(0) || '?'
+    const initial = user.display_name?.trim().charAt(0).toUpperCase() || '?'
 
     return (
       <div className="friend-card" key={user.id}>
         <div className="friend-avatar">
-          {avatar}
+          {user.avatar_url ? (
+            <img src={user.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%', display: 'block' }} />
+          ) : (
+            initial
+          )}
         </div>
 
         <div className="friend-info">
           <h3>{user.display_name}</h3>
-          <p>{user.email}</p>
-          <span>
-            {user.bio?.trim() || 'Thành viên New Beginning'}
-          </span>
+          <p>{user.bio?.trim() || 'Thành viên New Beginning'}</p>
         </div>
 
         {action}
@@ -457,12 +458,12 @@ export default function FriendsPage() {
                     filteredRequests.map(request => (
                       <div className="friend-card" key={request.id}>
                         <div className="friend-avatar">
-                          {request.sender.display_name?.trim().charAt(0) || '?'}
+                          {request.sender.avatar_url ? <img src={request.sender.avatar_url} alt='' style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%', display: 'block' }} /> : (request.sender.display_name?.trim().charAt(0).toUpperCase() || '?')}
                         </div>
 
                         <div className="friend-info">
                           <h3>{request.sender.display_name}</h3>
-                          <p>{request.sender.email}</p>
+                          <p>{request.sender.bio?.trim() || 'Thành viên New Beginning'}</p>
                           <span>
                             <Clock size={11} />
                             {' '}Đã gửi lời mời kết bạn
@@ -540,12 +541,12 @@ export default function FriendsPage() {
                     filteredSentRequests.map(request => (
                       <div className="friend-card" key={request.id}>
                         <div className="friend-avatar">
-                          {request.receiver.display_name?.trim().charAt(0) || '?'}
+                          {request.receiver.avatar_url ? <img src={request.receiver.avatar_url} alt='' style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%', display: 'block' }} /> : (request.receiver.display_name?.trim().charAt(0).toUpperCase() || '?')}
                         </div>
 
                         <div className="friend-info">
                           <h3>{request.receiver.display_name}</h3>
-                          <p>{request.receiver.email}</p>
+                          <p>{request.receiver.bio?.trim() || 'Thành viên New Beginning'}</p>
                           <span>Đang chờ phản hồi</span>
                         </div>
 

@@ -94,9 +94,9 @@ export type ChangePasswordPayload = {
 
 export type FriendUser = {
   id: number
-  email: string
   display_name: string
   bio: string
+  avatar_url?: string
   created_at: string
 }
 
@@ -184,7 +184,7 @@ export type Message = {
 }
 
 export type Conversation = {
-  friend: User
+  friend: FriendUser
   last_message: Message | null
   unread_count: number
 }

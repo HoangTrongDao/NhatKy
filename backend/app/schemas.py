@@ -16,6 +16,14 @@ class UserOut(BaseModel):
     avatar_url: str = ""
     created_at: datetime
 
+class UserPublicOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    display_name: str
+    bio: str = ""
+    avatar_url: str = ""
+    created_at: datetime
+
 class TokenOut(BaseModel):
     access_token: str
     token_type: str = "bearer"
@@ -55,7 +63,7 @@ class MemoryOut(BaseModel):
     visibility: str
     created_at: datetime
     updated_at: datetime | None = None
-    owner: UserOut | None = None
+    owner: UserPublicOut | None = None
 
 class ReflectionCreate(BaseModel):
     situation: str = Field(min_length=1, max_length=160)
@@ -130,6 +138,6 @@ class MessageOut(BaseModel):
 
 
 class ConversationOut(BaseModel):
-    friend: UserOut
+    friend: UserPublicOut
     last_message: MessageOut | None = None
     unread_count: int = 0
