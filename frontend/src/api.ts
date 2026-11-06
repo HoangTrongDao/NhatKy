@@ -169,3 +169,40 @@ export const removeFriend = (userId: number) =>
   api<FriendAction>(`/friends/${userId}`, {
     method: 'DELETE'
   })
+
+/* ── Messages Types ── */
+
+export type Message = {
+  id: number
+  sender_id: number
+  receiver_id: number
+  content: string
+  created_at: string
+  read_at: string | null
+}
+
+export type Conversation = {
+  friend: User
+  last_message: Message | null
+  unread_count: number
+}
+
+/* ── Messages API ── */
+
+export const fetchConversations = () =>
+  api<Conversation[]>('/messages/conversations')
+
+export const fetchMessages = (userId: number, limit = 50, offset = 0) =>
+  api<Message[]>(`/messages/${userId}?limit=${limit}&offset=${offset}`)
+
+export const sendMessage = (userId: number, content: string) =>
+  api<Message>(`/messages/${userId}`, {
+    method: 'POST',
+    body: JSON.stringify({ content })
+  })
+
+export const markMessageAsRead = (messageId: number) =>
+  api<Message>(`/messages/${messageId}/read`, { method: 'PATCH' })
+
+export const fetchUnreadCount = () =>
+  api<{ unread_count: number }>('/messages/unread-count')

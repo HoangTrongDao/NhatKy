@@ -3,8 +3,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.db.session import Base, engine
 from app import models  # noqa: F401 — registers SQLAlchemy models
-from app.api.v1 import auth, memories, reflections, goals, community, profile, stats
-from app import models
 from app.api.v1 import (
     auth,
     memories,
@@ -14,6 +12,7 @@ from app.api.v1 import (
     profile,
     stats,
     friends,
+    messages,
 )
 
 # 1. Khởi tạo Base Metadata cho Database trước
@@ -55,6 +54,7 @@ app.include_router(community.router, prefix=api)
 app.include_router(profile.router, prefix=api)
 app.include_router(stats.router, prefix=api)
 app.include_router(friends.router, prefix=api)
+app.include_router(messages.router, prefix=api)
 
 @app.get("/")
 def root():

@@ -1,6 +1,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 import {
   fetchFriends,
@@ -416,6 +417,7 @@ function FriendsPageStyles() {
 // ==========================================
 
 export default function FriendsPage() {
+  const navigate = useNavigate()
   const [friends, setFriends] = useState<FriendUser[]>([])
   const [requests, setRequests] = useState<FriendRequest[]>([])
   const [sentRequests, setSentRequests] = useState<FriendRequest[]>([])
@@ -795,7 +797,7 @@ export default function FriendsPage() {
                           className="friend-action"
                           title="Nhắn tin"
                           onClick={() =>
-                            alert('Chức năng nhắn tin sẽ được phát triển sau!')
+                            navigate(`/messages?user=${friend.id}`)
                           }
                         >
                           <MessageCircle size={17} />

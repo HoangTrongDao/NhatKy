@@ -109,3 +109,25 @@ class DashboardStatsOut(BaseModel):
     goals_in_progress: int
     recent_memory_title: str | None
     days_since_joined: int
+
+
+# ── Messages ──────────────────────────────────────────────
+
+class MessageCreate(BaseModel):
+    content: str = Field(min_length=1, max_length=5000)
+
+
+class MessageOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    sender_id: int
+    receiver_id: int
+    content: str
+    created_at: datetime
+    read_at: datetime | None = None
+
+
+class ConversationOut(BaseModel):
+    friend: UserOut
+    last_message: MessageOut | None = None
+    unread_count: int = 0
