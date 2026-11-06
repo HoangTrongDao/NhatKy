@@ -208,7 +208,7 @@ export default function MessagesPage() {
           gap: 8px;
           color: var(--text, #1a1a1a);
         }
-        .msg-sidebar-header h2 svg { color: #7c9a6e; }
+        .msg-sidebar-header h2 svg { color: #e6677e; }
         .msg-sidebar-actions {
           display: flex;
           gap: 8px;
@@ -224,12 +224,12 @@ export default function MessagesPage() {
           font-size: 0.85rem;
           outline: none;
         }
-        .msg-search-input:focus { border-color: #7c9a6e; }
+        .msg-search-input:focus { border-color: #e6677e; }
         .msg-new-btn {
           padding: 8px 16px;
           border-radius: 20px;
           border: none;
-          background: linear-gradient(135deg, #7c9a6e, #98b88a);
+          background: linear-gradient(135deg, #e6677e, #f0788d);
           color: #fff;
           font-size: 0.7rem;
           font-weight: 800;
@@ -237,12 +237,12 @@ export default function MessagesPage() {
           text-transform: uppercase;
           cursor: pointer;
           white-space: nowrap;
-          box-shadow: 0 3px 12px rgba(124, 154, 110, 0.3);
+          box-shadow: 0 3px 12px rgba(230, 103, 126, 0.3);
           transition: transform 0.18s, box-shadow 0.18s;
         }
         .msg-new-btn:hover {
           transform: translateY(-1px);
-          box-shadow: 0 6px 18px rgba(124, 154, 110, 0.38);
+          box-shadow: 0 6px 18px rgba(230, 103, 126, 0.4);
         }
 
         /* ── Conversation list ── */
@@ -262,13 +262,13 @@ export default function MessagesPage() {
         }
         .msg-conv-item:hover { background: var(--hover-bg, #f3f4f6); }
         .msg-conv-item.active {
-          background: rgba(124, 154, 110, 0.1);
-          border-left-color: #7c9a6e;
+          background: rgba(230, 103, 126, 0.08);
+          border-left-color: #e6677e;
         }
         .msg-conv-avatar {
           width: 44px; height: 44px;
           border-radius: 50%;
-          background: linear-gradient(135deg, #7c9a6e, #e8c78a);
+          background: linear-gradient(135deg, #e6677e, #e8c39e);
           display: flex; align-items: center; justify-content: center;
           color: #fff; font-weight: 700; font-size: 1.1rem;
           flex-shrink: 0;
@@ -287,7 +287,7 @@ export default function MessagesPage() {
         }
         .msg-conv-preview.unread { color: var(--text, #1a1a1a); font-weight: 600; }
         .msg-unread-badge {
-          background: #7c9a6e; color: #fff;
+          background: #e6677e; color: #fff;
           font-size: 0.65rem; font-weight: 700;
           min-width: 18px; height: 18px;
           border-radius: 9px;
@@ -356,15 +356,17 @@ export default function MessagesPage() {
           position: relative;
         }
         .msg-bubble.sent {
-          background: linear-gradient(135deg, #7c9a6e, #8fad7e);
+          background: linear-gradient(135deg, #e6677e, #f0788d);
           color: #fff;
           border-bottom-right-radius: 4px;
+          box-shadow: 0 3px 10px rgba(230, 103, 126, 0.25);
         }
         .msg-bubble.received {
-          background: var(--card-bg, #fff);
-          color: var(--text, #1a1a1a);
+          background: #fffdfa;
+          color: var(--text, #36282b);
           border-bottom-left-radius: 4px;
-          border: 1px solid var(--border, #e5e7eb);
+          border: 1px solid var(--border, #ede2d5);
+          box-shadow: 0 2px 8px rgba(0,0,0,0.04);
         }
         .msg-bubble-meta {
           display: flex;
@@ -400,23 +402,23 @@ export default function MessagesPage() {
           outline: none;
           line-height: 1.4;
         }
-        .msg-textarea:focus { border-color: #7c9a6e; }
+        .msg-textarea:focus { border-color: #e6677e; }
         .msg-send-btn {
           width: 42px; height: 42px;
           border-radius: 50%;
           border: none;
-          background: linear-gradient(135deg, #7c9a6e, #98b88a);
+          background: linear-gradient(135deg, #e6677e, #f0788d);
           color: #fff;
           cursor: pointer;
           display: flex; align-items: center; justify-content: center;
           flex-shrink: 0;
-          box-shadow: 0 4px 14px rgba(124, 154, 110, 0.35);
+          box-shadow: 0 4px 14px rgba(230, 103, 126, 0.35);
           transition: transform 0.18s, box-shadow 0.18s;
         }
         .msg-send-btn:disabled { opacity: 0.5; cursor: default; box-shadow: none; }
         .msg-send-btn:not(:disabled):hover {
           transform: translateY(-2px);
-          box-shadow: 0 6px 20px rgba(124, 154, 110, 0.45);
+          box-shadow: 0 6px 20px rgba(230, 103, 126, 0.45);
         }
 
         /* ── Empty states ── */
@@ -463,7 +465,7 @@ export default function MessagesPage() {
           cursor: pointer;
           transition: background 0.15s;
         }
-        .msg-friend-item:hover { background: rgba(124, 154, 110, 0.1); }
+        .msg-friend-item:hover { background: rgba(230, 103, 126, 0.1); }
         .msg-friend-list { flex: 1; overflow-y: auto; }
         .msg-modal-close {
           margin-top: 12px; padding: 8px 16px;

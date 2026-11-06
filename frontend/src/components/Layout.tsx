@@ -80,13 +80,14 @@ export default function Layout({ user, setUser, children }: LayoutProps) {
               <span>Tin nhắn</span>
               {unreadCount > 0 && (
                 <span style={{
-                  background: '#ef4444',
+                  background: 'var(--green, #e6677e)',
                   color: '#fff',
-                  fontSize: '0.7rem',
-                  fontWeight: 700,
+                  fontSize: '0.68rem',
+                  fontWeight: 800,
                   borderRadius: '10px',
                   padding: '1px 6px',
-                  lineHeight: '1.2'
+                  lineHeight: '1.2',
+                  boxShadow: '0 2px 6px rgba(230, 103, 126, 0.35)'
                 }}>
                   {unreadCount > 99 ? '99+' : unreadCount}
                 </span>

@@ -44,10 +44,17 @@ type TabType = 'friends' | 'requests' | 'suggestions' | 'sent'
 
 const friendsStyles = `
 .friends-page {
+  --accent: #e6677e;
+  --accent-hover: #cc4d65;
+  --background: #fcedf0;
+  --surface: #fffdfa;
+  --border: #ede2d5;
+  --text: #36282b;
+  --muted: #826e72;
   max-width: 1100px;
   margin: 0 auto;
   padding: 36px 24px 60px;
-  color: var(--text, #333);
+  color: var(--text, #36282b);
 }
 
 .friends-page * {
@@ -71,8 +78,8 @@ const friendsStyles = `
   gap: 20px;
   padding: 36px;
   border-radius: 20px;
-  background: var(--surface, #fff);
-  border: 1px solid var(--border, #eee);
+  background: var(--surface, #fffdfa); box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--border, #ede2d5);
   margin-bottom: 24px;
 }
 
@@ -80,7 +87,7 @@ const friendsStyles = `
   display: flex;
   align-items: center;
   gap: 8px;
-  color: var(--accent, #a87952);
+  color: var(--accent, #e6677e);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 1px;
@@ -105,8 +112,8 @@ const friendsStyles = `
   border-radius: 50%;
   display: grid;
   place-items: center;
-  color: var(--accent, #a87952);
-  background: var(--background, #f5eee7);
+  color: var(--accent, #e6677e);
+  background: var(--background, #fcedf0);
 }
 
 .friends-stats {
@@ -121,10 +128,10 @@ const friendsStyles = `
   align-items: center;
   gap: 14px;
   padding: 20px;
-  border: 1px solid var(--border, #eee);
-  background: var(--surface, #fff);
+  border: 1px solid var(--border, #ede2d5);
+  background: var(--surface, #fffdfa); box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04);
   border-radius: 16px;
-  color: var(--accent, #a87952);
+  color: var(--accent, #e6677e);
 }
 
 .friends-stat-card div {
@@ -145,9 +152,9 @@ const friendsStyles = `
 
 .friends-content {
   padding: 24px;
-  border: 1px solid var(--border, #eee);
+  border: 1px solid var(--border, #ede2d5);
   border-radius: 18px;
-  background: var(--surface, #fff);
+  background: var(--surface, #fffdfa); box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04);
 }
 
 .friends-toolbar {
@@ -181,7 +188,7 @@ const friendsStyles = `
 .friends-tabs {
   display: flex;
   gap: 24px;
-  border-bottom: 1px solid var(--border, #eee);
+  border-bottom: 1px solid var(--border, #ede2d5);
   margin-top: 25px;
   overflow-x: auto;
 }
@@ -197,8 +204,8 @@ const friendsStyles = `
 }
 
 .friends-tabs button.active {
-  color: var(--accent, #a87952);
-  border-bottom-color: var(--accent, #a87952);
+  color: var(--accent, #e6677e);
+  border-bottom-color: var(--accent, #e6677e);
   font-weight: 600;
 }
 
@@ -215,7 +222,7 @@ const friendsStyles = `
   gap: 13px;
   min-width: 0;
   padding: 17px;
-  border: 1px solid var(--border, #eee);
+  border: 1px solid var(--border, #ede2d5);
   border-radius: 14px;
   transition: transform .2s, box-shadow .2s;
 }
@@ -232,8 +239,8 @@ const friendsStyles = `
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: var(--background, #f2e8dc);
-  color: var(--accent, #a87952);
+  background: linear-gradient(135deg, #fcedf0, #f7ede2);
+  color: var(--accent, #e6677e);
   font-size: 19px;
   font-weight: 700;
 }
@@ -275,10 +282,10 @@ const friendsStyles = `
   flex-shrink: 0;
   display: grid;
   place-items: center;
-  border: 1px solid var(--border, #eee);
+  border: 1px solid var(--border, #ede2d5);
   border-radius: 10px;
   background: transparent;
-  color: var(--accent, #a87952);
+  color: var(--accent, #e6677e);
   cursor: pointer;
 }
 
@@ -296,14 +303,23 @@ const friendsStyles = `
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 9px 12px;
+  padding: 9px 16px;
   border: none;
-  border-radius: 9px;
-  background: var(--accent, #a87952);
+  border-radius: 999px;
+  background: linear-gradient(135deg, #e6677e, #f0788d);
   color: white;
-  font-size: 12px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
   cursor: pointer;
   white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(230, 103, 126, 0.3);
+  transition: transform 0.18s, box-shadow 0.18s;
+}
+.friend-add:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(230, 103, 126, 0.4);
 }
 
 .friends-empty {
@@ -322,7 +338,7 @@ const friendsStyles = `
   padding: 12px 15px;
   margin-top: 16px;
   border-radius: 10px;
-  background: var(--background, #f5eee7);
+  background: var(--background, #fcedf0);
   color: var(--text, #333);
   font-size: 13px;
 }
@@ -344,7 +360,7 @@ const friendsStyles = `
   border: 1px solid var(--border, #ddd);
   border-radius: 10px;
   background: transparent;
-  color: var(--accent, #a87952);
+  color: var(--accent, #e6677e);
   cursor: pointer;
   white-space: nowrap;
 }
