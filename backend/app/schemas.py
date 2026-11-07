@@ -73,12 +73,14 @@ class ReflectionCreate(BaseModel):
     feelings: str = Field(default="", max_length=10000)
     lesson: str = Field(default="", max_length=10000)
     closure_note: str = Field(default="", max_length=10000)
+    image_url: str | None = None
 
 class ReflectionUpdate(BaseModel):
     situation: str | None = Field(default=None, min_length=1, max_length=160)
     feelings: str | None = Field(default=None, max_length=10000)
     lesson: str | None = Field(default=None, max_length=10000)
     closure_note: str | None = Field(default=None, max_length=10000)
+    image_url: str | None = None
 
 class ReflectionOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -88,18 +90,21 @@ class ReflectionOut(BaseModel):
     feelings: str
     lesson: str
     closure_note: str
+    image_url: str | None = None
     created_at: datetime
     updated_at: datetime | None = None
 
 class GoalCreate(BaseModel):
     title: str = Field(min_length=1, max_length=160)
     description: str = Field(default="", max_length=10000)
+    image_url: str | None = None
     target_date: date | None = None
     status: Literal["planned", "in_progress", "completed"] = "planned"
 
 class GoalUpdate(BaseModel):
     title: str | None = Field(default=None, min_length=1, max_length=160)
     description: str | None = Field(default=None, max_length=10000)
+    image_url: str | None = None
     target_date: date | None = None
     status: Literal["planned", "in_progress", "completed"] | None = None
 
@@ -109,6 +114,7 @@ class GoalOut(BaseModel):
     user_id: int
     title: str
     description: str
+    image_url: str | None = None
     target_date: date | None
     status: str
     created_at: datetime

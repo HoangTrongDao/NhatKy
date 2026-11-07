@@ -11,6 +11,7 @@ class Reflection(Base):
     feelings: Mapped[str] = mapped_column(Text, default="")
     lesson: Mapped[str] = mapped_column(Text, default="")
     closure_note: Mapped[str] = mapped_column(Text, default="")
+    image_url: Mapped[str | None] = mapped_column(Text, nullable=True, default=None)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, onupdate=lambda: datetime.now(timezone.utc))
     owner = relationship("User", back_populates="reflections")
