@@ -10389,3 +10389,16 @@ button { cursor: pointer; }
 [data-theme="dark"] .locket-empty-icon {
   background: linear-gradient(135deg, rgba(46, 26, 32, 0.9), rgba(38, 28, 30, 0.9));
 }
+
+.locket-author-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.locket-controls-container {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+}

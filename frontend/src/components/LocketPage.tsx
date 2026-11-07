@@ -223,7 +223,7 @@ export default function LocketPage({ user }: { user: User | null }) {
     const width = video.videoWidth || 640
     const height = video.videoHeight || 640
     if (width === 0 || height === 0) {
-      addToast('Chờ tý nhé, hihi...', 'info')
+      addToast('Camera đang khởi động, vui lòng thử lại sau vài giây...', 'info')
       return
     }
 
@@ -266,7 +266,7 @@ export default function LocketPage({ user }: { user: User | null }) {
       }
       reader.readAsDataURL(file)
     } catch {
-      addToast('Lỗi rồi, thử lại đi...', 'error')
+      addToast('Không thể đọc tệp ảnh này.', 'error')
     }
   }
 
@@ -294,7 +294,7 @@ export default function LocketPage({ user }: { user: User | null }) {
     if (file && file.type.startsWith('image/')) {
       await processSelectedFile(file)
     } else {
-      addToast('Ôi,thử ảnh khác đi bạn...', 'error')
+      addToast('Vui lòng kéo thả tệp hình ảnh hợp lệ.', 'error')
     }
   }
 
@@ -320,12 +320,12 @@ export default function LocketPage({ user }: { user: User | null }) {
       setLockets(prev => [newLocket, ...prev])
       setCapturedPhoto(null)
       setCaption('')
-      addToast('Ảnh đẹp quá, hihi... ✨', 'success')
+      addToast('Đã gửi khoảnh khắc Locket thành công! ✨', 'success')
       // Chuyển sang Dòng thời gian để xem ngay khoảnh khắc vừa đăng
       setPageMode('timeline')
       void loadFeed()
     } catch (e) {
-      addToast(e instanceof Error ? e.message : 'Thử lại nhé...', 'error')
+      addToast(e instanceof Error ? e.message : 'Không gửi được Locket.', 'error')
     } finally {
       setSending(false)
     }
@@ -345,7 +345,7 @@ export default function LocketPage({ user }: { user: User | null }) {
       }
       setLockets(data)
     } catch {
-      addToast('Lỗi bảng tin...', 'error')
+      addToast('Không thể tải bảng tin Locket.', 'error')
     } finally {
       setLoadingFeed(false)
     }
@@ -381,7 +381,7 @@ export default function LocketPage({ user }: { user: User | null }) {
         setLightboxLocket(updated)
       }
     } catch {
-      addToast('Lỗi cảm xúc r...', 'error')
+      addToast('Không thể thả cảm xúc.', 'error')
       void loadFeed()
     }
   }
@@ -392,9 +392,9 @@ export default function LocketPage({ user }: { user: User | null }) {
       await deleteLocket(locketId)
       setLockets(prev => prev.filter(item => item.id !== locketId))
       if (lightboxLocket?.id === locketId) setLightboxLocket(null)
-      addToast('Delete.', 'info')
+      addToast('Đã xóa khoảnh khắc.', 'info')
     } catch {
-      addToast('Không thể xóa khoảng khắc này...', 'error')
+      addToast('Không thể xóa khoảnh khắc này.', 'error')
     }
   }
 
@@ -416,18 +416,18 @@ export default function LocketPage({ user }: { user: User | null }) {
     <RequireUser user={user}>
       <div className="page subpage locket-page-wrapper">
         <PageHeader
-          eyebrow="CamNK"
-          title="Chia sẻ Ảnh đi."
-          description="Mời bạn chụp ảnh..."
+          eyebrow="LOCKET WIDGET"
+          title="Khoảnh khắc trực tiếp."
+          description="Chụp nhanh hoặc chia sẻ khoảnh khắc chân thật gửi gắm đến không gian riêng tư của bạn bè và chính mình."
           icon={<Camera />}
         />
 
         {/* ── Mode Navigation Bar: Chụp Locket vs Dòng thời gian ── */}
-        <div className="NK-nav-mode-bar">
-          <div className="NK-nav-mode-pills">
+        <div className="locket-nav-mode-bar">
+          <div className="locket-nav-mode-pills">
             <button
               type="button"
-              className={`NK-mode-btn ${pageMode === 'studio' ? 'active' : ''}`}
+              className={`locket-mode-btn ${pageMode === 'studio' ? 'active' : ''}`}
               onClick={() => {
                 setPageMode('studio')
                 if (captureSource === 'camera' && !capturedPhoto && !isCameraActive) {
@@ -440,7 +440,7 @@ export default function LocketPage({ user }: { user: User | null }) {
             </button>
             <button
               type="button"
-              className={`NK-mode-btn ${pageMode === 'timeline' ? 'active' : ''}`}
+              className={`locket-mode-btn ${pageMode === 'timeline' ? 'active' : ''}`}
               onClick={() => {
                 stopCamera()
                 setPageMode('timeline')
@@ -457,21 +457,21 @@ export default function LocketPage({ user }: { user: User | null }) {
             CHẾ ĐỘ 1: STUDIO CHỤP LOCKET (IPHONE VIEW-FINDER DESIGN)
            ══════════════════════════════════════════════════════════════════ */}
         {pageMode === 'studio' && (
-          <div className="NK-studio-container">
-            <div className="NK-studio-card">
+          <div className="locket-studio-container">
+            <div className="locket-studio-card">
               {/* Toggle Source: Camera vs Tải ảnh */}
               {!capturedPhoto && (
-                <div className="NK-source-toggle">
+                <div className="locket-source-toggle">
                   <button
                     type="button"
-                    className={`NK-source-btn ${captureSource === 'camera' ? 'active' : ''}`}
+                    className={`locket-source-btn ${captureSource === 'camera' ? 'active' : ''}`}
                     onClick={() => void switchToCamera()}
                   >
                     <Camera size={14} /> Camera trực tiếp
                   </button>
                   <button
                     type="button"
-                    className={`NK-source-btn ${captureSource === 'upload' ? 'active' : ''}`}
+                    className={`locket-source-btn ${captureSource === 'upload' ? 'active' : ''}`}
                     onClick={switchToUpload}
                   >
                     <ImageIcon size={14} /> Tải ảnh lên
@@ -480,19 +480,19 @@ export default function LocketPage({ user }: { user: User | null }) {
               )}
 
               {/* Viewfinder Squircle (Khung hình chính) */}
-              <div className={`NK-viewfinder ${isFlashActive ? 'flash' : ''}`}>
+              <div className={`locket-viewfinder ${isFlashActive ? 'flash' : ''}`}>
                 {capturedPhoto ? (
                   /* Ảnh đã chụp / tải lên -> Xem trước & Thêm caption */
-                  <div className="NK-snap-preview">
-                    <img src={capturedPhoto} alt="Captured Locket" className="NK-snap-img" />
-                    <div className="NK-overlay-top">
-                      <span className="NK-pill">
+                  <div className="locket-snap-preview">
+                    <img src={capturedPhoto} alt="Captured Locket" className="locket-snap-img" />
+                    <div className="locket-overlay-top">
+                      <span className="locket-pill">
                         <Sparkles size={12} /> Khoảnh khắc vừa chụp
                       </span>
                     </div>
 
                     {/* Floating Caption Input */}
-                    <div className="NK-floating-caption">
+                    <div className="locket-floating-caption">
                       <input
                         type="text"
                         placeholder="Viết một ghi chú ngắn cho khoảnh khắc này…"
@@ -506,7 +506,7 @@ export default function LocketPage({ user }: { user: User | null }) {
                 ) : captureSource === 'camera' ? (
                   /* Chế độ Camera */
                   isCameraActive ? (
-                    <div className="NK-live-stream-box">
+                    <div className="locket-live-stream-box">
                       <video
                         ref={bindVideoRef}
                         autoPlay
@@ -514,20 +514,20 @@ export default function LocketPage({ user }: { user: User | null }) {
                         muted
                         onLoadedData={() => setIsVideoReady(true)}
                         onCanPlay={() => setIsVideoReady(true)}
-                        className="NK-video-stream"
+                        className="locket-video-stream"
                         style={{ transform: facingMode === 'user' ? 'scaleX(-1)' : 'none' }}
                       />
 
                       {(cameraLoading || !isVideoReady) && (
-                        <div className="NK-camera-loading-overlay">
-                          <RefreshCw size={26} className="NK-spinner" />
+                        <div className="locket-camera-loading-overlay">
+                          <RefreshCw size={26} className="locket-spinner" />
                           <span>Đang kết nối camera...</span>
                         </div>
                       )}
 
                       <button
                         type="button"
-                        className="NK-flip-btn"
+                        className="locket-flip-btn"
                         onClick={() => void toggleFacingMode()}
                         title="Đổi camera trước/sau"
                       >
@@ -536,7 +536,7 @@ export default function LocketPage({ user }: { user: User | null }) {
                     </div>
                   ) : cameraError ? (
                     /* Lỗi mở Camera -> Hiển thị chuyển nhanh sang tải ảnh */
-                    <div className="NK-camera-fallback">
+                    <div className="locket-camera-fallback">
                       <AlertCircle size={40} color="#f87171" />
                       <strong>Không thể mở Camera</strong>
                       <p>{cameraError}</p>
@@ -551,11 +551,11 @@ export default function LocketPage({ user }: { user: User | null }) {
                     </div>
                   ) : (
                     /* Trạng thái chuẩn bị */
-                    <div className="NK-dropzone" onClick={() => void startCamera()}>
-                      <div className="NK-dropzone-icon">
+                    <div className="locket-dropzone" onClick={() => void startCamera()}>
+                      <div className="locket-dropzone-icon">
                         <Camera size={34} />
                       </div>
-                      <strong>Bật Camera NK</strong>
+                      <strong>Bật Camera Locket</strong>
                       <p>Nhấp vào đây để mở camera và bắt đầu chụp ảnh trực tiếp</p>
                       <button type="button" className="button primary small" style={{ marginTop: 6 }}>
                         Mở Camera ngay
@@ -565,13 +565,13 @@ export default function LocketPage({ user }: { user: User | null }) {
                 ) : (
                   /* Chế độ Tải ảnh (Dropzone) */
                   <div
-                    className={`NK-dropzone ${isDragOver ? 'dragover' : ''}`}
+                    className={`locket-dropzone ${isDragOver ? 'dragover' : ''}`}
                     onClick={() => fileInputRef.current?.click()}
                     onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}
                     onDrop={e => void handleDrop(e)}
                   >
-                    <div className="NK-dropzone-icon">
+                    <div className="locket-dropzone-icon">
                       <UploadCloud size={34} />
                     </div>
                     <strong>Kéo thả ảnh vào đây</strong>
@@ -584,36 +584,36 @@ export default function LocketPage({ user }: { user: User | null }) {
               </div>
 
               {/* Điều khiển chụp & gửi */}
-              <div className="NK-controls-container">
+              <div className="locket-controls-container">
                 {capturedPhoto ? (
                   /* Form xuất bản ảnh */
-                  <div className="NK-publish-box">
+                  <div className="locket-publish-box">
                     {/* Chọn đối tượng xem */}
-                    <div className="NK-vis-selector">
+                    <div className="locket-vis-selector">
                       <button
                         type="button"
-                        className={`NK-vis-btn ${visibility === 'friends' ? 'active' : ''}`}
+                        className={`locket-vis-btn ${visibility === 'friends' ? 'active' : ''}`}
                         onClick={() => setVisibility('friends')}
                       >
                         <Users size={14} /> Bạn bè
                       </button>
                       <button
                         type="button"
-                        className={`NK-vis-btn ${visibility === 'public' ? 'active' : ''}`}
+                        className={`locket-vis-btn ${visibility === 'public' ? 'active' : ''}`}
                         onClick={() => setVisibility('public')}
                       >
                         <Globe size={14} /> Công khai
                       </button>
                       <button
                         type="button"
-                        className={`NK-vis-btn ${visibility === 'private' ? 'active' : ''}`}
+                        className={`locket-vis-btn ${visibility === 'private' ? 'active' : ''}`}
                         onClick={() => setVisibility('private')}
                       >
                         <Lock size={14} /> Riêng tư
                       </button>
                     </div>
 
-                    <div className="NK-action-btns">
+                    <div className="locket-action-btns">
                       <button
                         type="button"
                         className="button secondary"
@@ -745,8 +745,8 @@ export default function LocketPage({ user }: { user: User | null }) {
             {/* Danh sách Widgets */}
             {loadingFeed ? (
               <div className="locket-empty-state">
-                <RefreshCw size={28} className="NK-spinner" />
-                <span>Đang tải những khoảnh khắc NK mới nhất…</span>
+                <RefreshCw size={28} className="locket-spinner" />
+                <span>Đang tải những khoảnh khắc Locket mới nhất…</span>
               </div>
             ) : lockets.length === 0 ? (
               <div className="locket-empty-state">
@@ -770,22 +770,22 @@ export default function LocketPage({ user }: { user: User | null }) {
                 </button>
               </div>
             ) : (
-              <div className="NK-widgets-grid">
+              <div className="locket-widgets-grid">
                 {lockets.map(item => {
                   const isMine = user && item.user_id === user.id
                   return (
-                    <article className="NK-widget-card" key={item.id}>
+                    <article className="locket-widget-card" key={item.id}>
                       {/* Header Widget: Người gửi & Thời gian */}
-                      <div className="NK-widget-header">
-                        <div className="NK-widget-author">
-                          <span className="NK-author-avatar">
+                      <div className="locket-widget-header">
+                        <div className="locket-widget-author">
+                          <span className="locket-author-avatar">
                             {item.owner?.avatar_url ? (
                               <img src={item.owner.avatar_url} alt="" />
                             ) : (
                               item.owner?.display_name?.charAt(0).toUpperCase() || 'U'
                             )}
                           </span>
-                          <div className="NK-author-text">
+                          <div className="locket-author-text">
                             <strong>{item.owner?.display_name || 'Thành viên'}</strong>
                             <small>{formatTimeAgo(item.created_at)}</small>
                           </div>
@@ -794,13 +794,13 @@ export default function LocketPage({ user }: { user: User | null }) {
                         {isMine && (
                           <ConfirmDialog
                             title="Xóa khoảnh khắc"
-                            message="Suy nghĩ lại đi, nên xóa nó không..?"
+                            message="Bạn có chắc chắn muốn xóa bức ảnh Locket này?"
                             onConfirm={() => void handleDelete(item.id)}
                           >
                             {(open) => (
                               <button
                                 type="button"
-                                className="NK-delete-btn"
+                                className="locket-delete-btn"
                                 onClick={open}
                                 title="Xóa ảnh này"
                               >
@@ -813,7 +813,7 @@ export default function LocketPage({ user }: { user: User | null }) {
 
                       {/* Khung ảnh Squircle chuẩn Locket */}
                       <div
-                        className="NK-widget-photo-wrap"
+                        className="locket-widget-photo-wrap"
                         onClick={() => setLightboxLocket(item)}
                         title="Nhấp để phóng to"
                       >
@@ -821,18 +821,18 @@ export default function LocketPage({ user }: { user: User | null }) {
                         <div className="locket-photo-time-badge">
                           <span>{formatTimeAgo(item.created_at)}</span>
                         </div>
-                        <div className="NK-photo-zoom-hint">
+                        <div className="locket-photo-zoom-hint">
                           <Maximize2 size={14} />
                         </div>
                       </div>
 
                       {/* Caption nếu có */}
                       {item.caption && (
-                        <p className="NK-widget-caption">“{item.caption}”</p>
+                        <p className="locket-widget-caption">“{item.caption}”</p>
                       )}
 
                       {/* Hàng thả cảm xúc nhanh */}
-                      <div className="NK-reactions-bar">
+                      <div className="locket-reactions-bar">
                         {REACTION_EMOJIS.map(emoji => {
                           const count = (item.reactions?.[emoji] || []).length
                           const hasReacted = user && (item.reactions?.[emoji] || []).includes(user.id)
