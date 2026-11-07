@@ -1,45 +1,15 @@
-import { useState, useEffect, useRef, ChangeEvent } from 'react'
+import { useState, useEffect, useRef, ChangeEvent, useCallback } from 'react'
 import {
   Camera, RefreshCw, Send, Image as ImageIcon, Sparkles,
   Users, Globe, Lock, Trash2, Maximize2, X, Download
 } from 'lucide-react'
-import { User, LocketItem, fetchLocketFeed, fetchMyLockets, fetchFriendsLockets, createLocket, reactToLocket, deleteLocket } from '../api'
+import { User, LocketItem, fetchLocketFeed, fetchMyLockets, fetchFriendsLockets, createLocket, reactToLocket, deleteLocket, compressImageDataUrl } from '../api'
 import { useToast } from './Toast'
 import RequireUser from './RequireUser'
 import PageHeader from './PageHeader'
 import ConfirmDialog from './ConfirmDialog'
 
 const REACTION_EMOJIS = ['❤️', '🔥', '🥰', '😂', '✨']
-
-/**
- * Nén ảnh sang JPEG chất lượng cao phía client bằng Canvas
- */
-function compressImageDataUrl(dataUrl: string, maxDim = 1200, quality = 0.85): Promise<string> {
-  return new Promise((resolve) => {
-    const img = new Image()
-    img.onload = () => {
-      let { width, height } = img
-      if (width > height) {
-        if (width > maxDim) {
-          height = Math.round((height * maxDim) / width)
-          width = maxDim
-        }
-      } else {
-        if (height > maxDim) {
-          width = Math.round((width * maxDim) / height)
-          height = maxDim
-        }
-      }
-      const canvas = document.createElement('canvas')
-      canvas.width = width
-      canvas.height = height
-      const ctx = canvas.getContext('2d')
-      ctx?.drawImage(img, 0, 0, width, height)
-      resolve(canvas.toDataURL('image/jpeg', quality))
-    }
-    img.src = dataUrl
-  })
-}
 
 export default function LocketPage({ user }: { user: User | null }) {
   const [activeTab, setActiveTab] = useState<'all' | 'friends' | 'my'>('all')
@@ -49,6 +19,8 @@ export default function LocketPage({ user }: { user: User | null }) {
 
   /* ── Camera State ── */
   const [isCameraActive, setIsCameraActive] = useState(false)
+  const [cameraLoading, setCameraLoading] = useState(false)
+  const [isVideoReady, setIsVideoReady] = useState(false)
   const [cameraError, setCameraError] = useState<string | null>(null)
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user')
   const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null)
@@ -56,7 +28,7 @@ export default function LocketPage({ user }: { user: User | null }) {
   const [visibility, setVisibility] = useState<'friends' | 'public' | 'private'>('friends')
   const [isFlashActive, setIsFlashActive] = useState(false)
 
-  const videoRef = useRef<HTMLVideoElement>(null)
+  const videoRef = useRef<HTMLVideoElement | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -65,81 +37,197 @@ export default function LocketPage({ user }: { user: User | null }) {
 
   const { addToast } = useToast()
 
-  // Start webcam
-  const startCamera = async () => {
-    stopCamera()
-    setCameraError(null)
-    try {
-      const constraints: MediaStreamConstraints = {
-        video: {
-          facingMode,
-          width: { ideal: 1080 },
-          height: { ideal: 1080 },
-        },
-        audio: false,
+  // Callback ref: gắn kết stream vào thẻ video ngay lập tức khi thẻ video xuất hiện trong DOM
+  const bindVideoRef = useCallback((node: HTMLVideoElement | null) => {
+    videoRef.current = node
+    if (node && streamRef.current) {
+      if (node.srcObject !== streamRef.current) {
+        node.srcObject = streamRef.current
       }
-      const stream = await navigator.mediaDevices.getUserMedia(constraints)
-      streamRef.current = stream
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream
-        await videoRef.current.play()
+      node.onloadedmetadata = () => {
+        node.play().catch(e => console.warn('Video play caught:', e))
       }
-      setIsCameraActive(true)
-    } catch {
-      setCameraError('Không thể mở camera trên thiết bị. Bạn có thể chọn tải ảnh từ thư viện.')
-      setIsCameraActive(false)
+      node.play().catch(e => console.warn('Video play caught:', e))
     }
-  }
+  }, [])
 
-  // Stop webcam
-  const stopCamera = () => {
+  // Đảm bảo stream luôn được bind vào video khi camera active
+  useEffect(() => {
+    if (isCameraActive && videoRef.current && streamRef.current) {
+      const v = videoRef.current
+      if (v.srcObject !== streamRef.current) {
+        v.srcObject = streamRef.current
+      }
+      v.play().catch(() => {})
+    }
+  }, [isCameraActive, facingMode])
+
+  // Dọn dẹp stream khi unmount
+  useEffect(() => {
+    return () => {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(t => {
+          try { t.stop() } catch {}
+        })
+        streamRef.current = null
+      }
+    }
+  }, [])
+
+  // Khởi động webcam với cơ chế đa tầng fallback (HD -> FacingMode -> Generic Video)
+  const startCamera = async (targetMode?: 'user' | 'environment') => {
+    const mode = targetMode || facingMode
+    setCameraError(null)
+    setCameraLoading(true)
+    setIsVideoReady(false)
+
+    // Dừng track cũ trước khi mở luồng mới
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop())
+      streamRef.current.getTracks().forEach(track => {
+        try { track.stop() } catch {}
+      })
       streamRef.current = null
     }
-    setIsCameraActive(false)
-  }
 
-  // Flip front/back camera
-  const toggleFacingMode = () => {
-    setFacingMode(prev => prev === 'user' ? 'environment' : 'user')
-  }
-
-  useEffect(() => {
-    if (isCameraActive && !capturedPhoto) {
-      startCamera()
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setCameraError('Trình duyệt hoặc môi trường hiện tại không hỗ trợ camera trực tiếp. Bạn hãy bấm "Chọn ảnh từ thư viện" bên dưới.')
+      setCameraLoading(false)
+      setIsCameraActive(false)
+      return
     }
-    return () => stopCamera()
-  }, [facingMode])
 
-  // Snap photo from live camera
+    try {
+      let stream: MediaStream | null = null
+
+      // Tầng 1: Thử độ phân giải 16:9 chuẩn (tương thích hầu hết webcam máy tính và điện thoại)
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: { ideal: mode },
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+          },
+          audio: false,
+        })
+      } catch (err1) {
+        console.warn('Tier 1 constraints failed, trying facingMode only...', err1)
+        // Tầng 2: Thử chỉ với facingMode
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              facingMode: { ideal: mode },
+            },
+            audio: false,
+          })
+        } catch (err2) {
+          console.warn('Tier 2 failed, falling back to generic video...', err2)
+          // Tầng 3: Nhận bất kỳ luồng video nào từ thiết bị
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: false,
+          })
+        }
+      }
+
+      if (!stream) {
+        throw new Error('Không thể nhận luồng hình ảnh từ camera.')
+      }
+
+      streamRef.current = stream
+      setIsCameraActive(true)
+
+      // Gắn trực tiếp nếu node đã tồn tại
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream
+        videoRef.current.onloadedmetadata = () => {
+          videoRef.current?.play().catch(e => console.warn('Video play caught:', e))
+        }
+        videoRef.current.play().catch(e => console.warn('Video play caught:', e))
+      }
+    } catch (err: any) {
+      console.error('Camera access error:', err)
+      let msg = 'Không thể mở camera trên thiết bị.'
+      if (err?.name === 'NotAllowedError' || err?.name === 'PermissionDeniedError') {
+        msg = 'Quyền truy cập Camera đã bị từ chối. Vui lòng cho phép quyền Camera trong cài đặt trình duyệt để tiếp tục.'
+      } else if (err?.name === 'NotFoundError' || err?.name === 'DevicesNotFoundError') {
+        msg = 'Không tìm thấy thiết bị camera khả dụng trên máy của bạn.'
+      } else if (err?.name === 'NotReadableError' || err?.name === 'TrackStartError') {
+        msg = 'Camera đang bị ứng dụng khác (Zoom, Teams, v.v.) chiếm dụng hoặc gặp xung đột phần cứng.'
+      } else if (err?.name === 'OverconstrainedError') {
+        msg = 'Camera không đáp ứng thông số video yêu cầu.'
+      }
+      setCameraError(`${msg} Bạn có thể chọn tải ảnh từ máy.`)
+      setIsCameraActive(false)
+    } finally {
+      setCameraLoading(false)
+    }
+  }
+
+  // Tắt camera
+  const stopCamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => {
+        try { track.stop() } catch {}
+      })
+      streamRef.current = null
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null
+    }
+    setIsCameraActive(false)
+    setIsVideoReady(false)
+  }
+
+  // Đổi camera trước / sau
+  const toggleFacingMode = async () => {
+    const nextMode = facingMode === 'user' ? 'environment' : 'user'
+    setFacingMode(nextMode)
+    if (isCameraActive) {
+      await startCamera(nextMode)
+    }
+  }
+
+  // Chụp ảnh trực tiếp từ live camera
   const capturePhoto = async () => {
     if (!videoRef.current) return
     const video = videoRef.current
 
-    // Trigger visual flash
+    const width = video.videoWidth || 640
+    const height = video.videoHeight || 640
+    if (width === 0 || height === 0) {
+      addToast('Camera đang khởi động, vui lòng đợi trong giây lát...', 'info')
+      return
+    }
+
+    // Hiệu ứng chớp flash
     setIsFlashActive(true)
-    setTimeout(() => setIsFlashActive(false), 150)
+    setTimeout(() => setIsFlashActive(false), 160)
 
     const canvas = document.createElement('canvas')
-    const size = Math.min(video.videoWidth || 640, video.videoHeight || 640)
+    const size = Math.min(width, height)
     canvas.width = size
     canvas.height = size
 
     const ctx = canvas.getContext('2d')
     if (ctx) {
-      // Crop square from video center
-      const sx = ((video.videoWidth || size) - size) / 2
-      const sy = ((video.videoHeight || size) - size) / 2
+      // Nếu là camera trước, lật ảnh ngang để ảnh chụp khớp với hình ảnh phản chiếu người dùng thấy
+      if (facingMode === 'user') {
+        ctx.translate(size, 0)
+        ctx.scale(-1, 1)
+      }
+
+      // Cắt khung vuông hoàn hảo ở tâm video
+      const sx = (width - size) / 2
+      const sy = (height - size) / 2
       ctx.drawImage(video, sx, sy, size, size, 0, 0, size, size)
-      const rawData = canvas.toDataURL('image/jpeg', 0.9)
+      const rawData = canvas.toDataURL('image/jpeg', 0.92)
       const optimized = await compressImageDataUrl(rawData, 1080, 0.85)
       setCapturedPhoto(optimized)
       stopCamera()
     }
   }
 
-  // Pick photo from file input
+  // Tải ảnh từ thư viện thiết bị
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -159,14 +247,14 @@ export default function LocketPage({ user }: { user: User | null }) {
     }
   }
 
-  // Discard / Retake photo
+  // Hủy ảnh / Chụp lại
   const retakePhoto = () => {
     setCapturedPhoto(null)
     setCaption('')
     startCamera()
   }
 
-  // Submit / Send Locket
+  // Gửi Locket
   const handleSendLocket = async () => {
     if (!capturedPhoto) return
     setSending(true)
@@ -188,7 +276,7 @@ export default function LocketPage({ user }: { user: User | null }) {
     }
   }
 
-  // Load Locket Feed
+  // Tải bảng tin Locket
   const loadFeed = async () => {
     setLoading(true)
     try {
@@ -214,11 +302,11 @@ export default function LocketPage({ user }: { user: User | null }) {
     }
   }, [user, activeTab])
 
-  // React to Locket
+  // Thả cảm xúc
   const handleReact = async (locketId: number, emoji: string) => {
     if (!user) return
     try {
-      // Optimistic update
+      // Cập nhật lạc quan trên UI
       setLockets(prev => prev.map(item => {
         if (item.id !== locketId) return item
         const reactions = { ...(item.reactions || {}) }
@@ -243,7 +331,7 @@ export default function LocketPage({ user }: { user: User | null }) {
     }
   }
 
-  // Delete Locket
+  // Xóa Locket
   const handleDelete = async (locketId: number) => {
     try {
       await deleteLocket(locketId)
@@ -312,13 +400,21 @@ export default function LocketPage({ user }: { user: User | null }) {
                 /* Đang mở Camera trực tiếp */
                 <div className="locket-live-stream-box">
                   <video
-                    ref={videoRef}
+                    ref={bindVideoRef}
                     autoPlay
                     playsInline
                     muted
+                    onLoadedData={() => setIsVideoReady(true)}
+                    onCanPlay={() => setIsVideoReady(true)}
                     className="locket-video-stream"
                     style={{ transform: facingMode === 'user' ? 'scaleX(-1)' : 'none' }}
                   />
+                  {(cameraLoading || !isVideoReady) && (
+                    <div className="locket-camera-loading-overlay">
+                      <RefreshCw size={24} className="locket-spinner" />
+                      <span>Đang kết nối camera...</span>
+                    </div>
+                  )}
                   <button
                     type="button"
                     className="locket-flip-btn"
@@ -336,7 +432,7 @@ export default function LocketPage({ user }: { user: User | null }) {
                   </div>
                   <strong>Sẵn sàng ghi lại khoảnh khắc?</strong>
                   <p>Bật camera để chụp trực tiếp hoặc tải ảnh từ máy</p>
-                  <button type="button" className="button primary" onClick={startCamera}>
+                  <button type="button" className="button primary" onClick={() => void startCamera()}>
                     <Camera size={16} /> Mở Camera trực tiếp
                   </button>
                   {cameraError && <span className="locket-error-tag">{cameraError}</span>}
@@ -448,7 +544,7 @@ export default function LocketPage({ user }: { user: User | null }) {
                 </div>
               )}
 
-              {/* Input file ẩn */}
+              {/* Hidden file input */}
               <input
                 ref={fileInputRef}
                 type="file"
@@ -460,11 +556,11 @@ export default function LocketPage({ user }: { user: User | null }) {
           </section>
 
           {/* ════════════════════════════════════════════════════
-              CỘT PHẢI: BẢNG TIN KHOẢNH KHẮC LOCKET (FEED)
+              CỘT PHẢI: FEED KHOẢNH KHẮC LOCKET
              ════════════════════════════════════════════════════ */}
           <section className="locket-feed-card">
-            {/* Thanh Tab phân loại */}
-            <div className="locket-tab-bar">
+            {/* Header Tabs */}
+            <div className="locket-tabs-header">
               <button
                 type="button"
                 className={`locket-tab ${activeTab === 'all' ? 'active' : ''}`}
@@ -490,9 +586,9 @@ export default function LocketPage({ user }: { user: User | null }) {
 
             {/* Danh sách Locket */}
             {loading ? (
-              <div className="locket-loading-grid">
-                <div className="locket-skeleton-card" />
-                <div className="locket-skeleton-card" />
+              <div className="locket-loading-state">
+                <RefreshCw size={28} className="locket-spinner" />
+                <span>Đang tải những khoảnh khắc mới nhất…</span>
               </div>
             ) : lockets.length === 0 ? (
               <div className="locket-empty-state">
@@ -507,103 +603,94 @@ export default function LocketPage({ user }: { user: User | null }) {
                     ? 'Bạn chưa chụp khoảnh khắc nào. Hãy bật camera để gửi tấm ảnh đầu tiên!'
                     : 'Bảng tin Locket đang yên bình. Hãy ghi lại khoảnh khắc đầu tiên của ngày hôm nay!'}
                 </p>
-                <button type="button" className="button primary" onClick={startCamera}>
+                <button type="button" className="button primary" onClick={() => void startCamera()}>
                   <Camera size={16} /> Chụp Locket ngay
                 </button>
               </div>
             ) : (
               <div className="locket-feed-grid">
                 {lockets.map(item => {
-                  const isOwner = user?.id === item.user_id
+                  const isMine = user && item.user_id === user.id
                   return (
-                    <article className="locket-post-card" key={item.id}>
-                      {/* Locket Header */}
-                      <div className="locket-post-header">
-                        <div className="locket-author-info">
-                          <span className="locket-author-avatar">
-                            {item.owner?.avatar_url ? (
-                              <img src={item.owner.avatar_url} alt="" />
-                            ) : (
-                              item.owner?.display_name?.charAt(0).toUpperCase() || 'U'
-                            )}
-                          </span>
-                          <div>
-                            <strong>{item.owner?.display_name || 'Thành viên'}</strong>
-                            <small>{formatTimeAgo(item.created_at)}</small>
+                    <article className="locket-item-card" key={item.id}>
+                      <div className="locket-item-widget">
+                        {/* Ảnh Locket squircle */}
+                        <div
+                          className="locket-item-photo-wrap"
+                          onClick={() => setLightboxLocket(item)}
+                          title="Nhấp để phóng to"
+                        >
+                          <img src={item.image_url} alt={item.caption || 'Locket'} className="locket-item-photo" />
+
+                          {/* Time badge */}
+                          <div className="locket-photo-time-badge">
+                            <span>{formatTimeAgo(item.created_at)}</span>
+                          </div>
+
+                          {/* Zoom icon hint */}
+                          <div className="locket-photo-zoom-hint">
+                            <Maximize2 size={15} />
                           </div>
                         </div>
 
-                        {/* Visibility & Actions */}
-                        <div className="locket-post-actions">
-                          <span className="locket-vis-pill" title={item.visibility}>
-                            {item.visibility === 'public' ? (
-                              <Globe size={12} />
-                            ) : item.visibility === 'private' ? (
-                              <Lock size={12} />
-                            ) : (
-                              <Users size={12} />
-                            )}
-                          </span>
+                        {/* Thông tin người gửi */}
+                        <div className="locket-author-row">
+                          <div className="locket-author-info">
+                            <span className="locket-author-avatar">
+                              {item.owner?.avatar_url ? (
+                                <img src={item.owner.avatar_url} alt="" />
+                              ) : (
+                                item.owner?.display_name?.charAt(0).toUpperCase() || 'U'
+                              )}
+                            </span>
+                            <span className="locket-author-name">
+                              {item.owner?.display_name || 'Thành viên'}
+                            </span>
+                          </div>
 
-                          {isOwner && (
+                          {isMine && (
                             <ConfirmDialog
-                              title="Xóa khoảnh khắc Locket"
-                              message="Bạn có chắc chắn muốn xóa khoảnh khắc này?"
+                              title="Xóa khoảnh khắc"
+                              message="Bạn có chắc chắn muốn xóa bức ảnh Locket này?"
                               onConfirm={() => handleDelete(item.id)}
                             >
-                              {open => (
+                              {(open) => (
                                 <button
                                   type="button"
-                                  className="locket-del-btn"
+                                  className="locket-delete-btn"
                                   onClick={open}
-                                  title="Xóa khoảnh khắc"
+                                  title="Xóa ảnh này"
                                 >
-                                  <Trash2 size={13} />
+                                  <Trash2 size={14} />
                                 </button>
                               )}
                             </ConfirmDialog>
                           )}
                         </div>
-                      </div>
 
-                      {/* Locket Image Squircle */}
-                      <div
-                        className="locket-post-img-frame"
-                        onClick={() => setLightboxLocket(item)}
-                        title="Chạm để xem ảnh toàn màn hình"
-                      >
-                        <img src={item.image_url} alt={item.caption || 'Locket'} loading="lazy" />
-
-                        {/* Frosted caption pill */}
+                        {/* Caption nếu có */}
                         {item.caption && (
-                          <div className="locket-overlay-bottom">
-                            <span className="locket-caption-pill">{item.caption}</span>
-                          </div>
+                          <p className="locket-item-caption">{item.caption}</p>
                         )}
 
-                        <span className="locket-tap-hint">
-                          <Maximize2 size={13} />
-                        </span>
-                      </div>
-
-                      {/* Interactive Emoji Reaction Bar */}
-                      <div className="locket-reactions-bar">
-                        {REACTION_EMOJIS.map(emoji => {
-                          const count = (item.reactions?.[emoji] || []).length
-                          const hasReacted = user && (item.reactions?.[emoji] || []).includes(user.id)
-                          return (
-                            <button
-                              key={emoji}
-                              type="button"
-                              className={`locket-react-btn ${hasReacted ? 'reacted' : ''}`}
-                              onClick={() => handleReact(item.id, emoji)}
-                              title={`Thả cảm xúc ${emoji}`}
-                            >
-                              <span className="react-emoji">{emoji}</span>
-                              {count > 0 && <span className="react-count">{count}</span>}
-                            </button>
-                          )
-                        })}
+                        {/* Hàng thả cảm xúc nhanh */}
+                        <div className="locket-quick-reactions">
+                          {REACTION_EMOJIS.map(emoji => {
+                            const count = (item.reactions?.[emoji] || []).length
+                            const hasReacted = user && (item.reactions?.[emoji] || []).includes(user.id)
+                            return (
+                              <button
+                                key={emoji}
+                                type="button"
+                                className={`locket-react-btn ${hasReacted ? 'reacted' : ''}`}
+                                onClick={() => handleReact(item.id, emoji)}
+                              >
+                                <span className="react-emoji">{emoji}</span>
+                                {count > 0 && <span className="react-count">{count}</span>}
+                              </button>
+                            )
+                          })}
+                        </div>
                       </div>
                     </article>
                   )
@@ -614,15 +701,10 @@ export default function LocketPage({ user }: { user: User | null }) {
         </div>
 
         {/* ════════════════════════════════════════════════════
-            LIGHTBOX XEM ẢNH FULLSCREEN
+            MODAL LIGHTBOX: XEM ẢNH FULL KÍCH THƯỚC
            ════════════════════════════════════════════════════ */}
         {lightboxLocket && (
-          <div
-            className="locket-lightbox-overlay"
-            onClick={() => setLightboxLocket(null)}
-            role="dialog"
-            aria-modal="true"
-          >
+          <div className="locket-lightbox-overlay" onClick={() => setLightboxLocket(null)}>
             <div className="locket-lightbox-card" onClick={e => e.stopPropagation()}>
               <button
                 type="button"
