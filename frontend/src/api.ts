@@ -218,3 +218,47 @@ export const markMessageAsRead = (messageId: number) =>
 
 export const fetchUnreadCount = () =>
   api<{ unread_count: number }>('/messages/unread-count')
+/* ── Locket Types & API ── */
+
+export type LocketItem = {
+  id: number
+  user_id: number
+  image_url: string
+  caption: string
+  visibility: 'friends' | 'public' | 'private'
+  reactions: Record<string, number[]>
+  created_at: string
+  owner?: FriendUser
+}
+
+export type CreateLocketPayload = {
+  image_url: string
+  caption?: string
+  visibility?: 'friends' | 'public' | 'private'
+}
+
+export const fetchLocketFeed = (limit = 30, offset = 0) =>
+  api<LocketItem[]>(`/lockets?limit=${limit}&offset=${offset}`)
+
+export const fetchMyLockets = (limit = 50, offset = 0) =>
+  api<LocketItem[]>(`/lockets/my?limit=${limit}&offset=${offset}`)
+
+export const fetchFriendsLockets = (limit = 30, offset = 0) =>
+  api<LocketItem[]>(`/lockets/friends?limit=${limit}&offset=${offset}`)
+
+export const createLocket = (data: CreateLocketPayload) =>
+  api<LocketItem>('/lockets', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+
+export const reactToLocket = (locketId: number, emoji: string) =>
+  api<LocketItem>(`/lockets/${locketId}/react`, {
+    method: 'POST',
+    body: JSON.stringify({ emoji }),
+  })
+
+export const deleteLocket = (locketId: number) =>
+  api<void>(`/lockets/${locketId}`, {
+    method: 'DELETE',
+  })

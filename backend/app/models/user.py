@@ -18,3 +18,4 @@ class User(Base):
     memories = relationship("Memory", back_populates="owner", cascade="all, delete-orphan")
     reflections = relationship("Reflection", back_populates="owner", cascade="all, delete-orphan")
     goals = relationship("Goal", back_populates="owner", cascade="all, delete-orphan")
+    lockets = relationship("Locket", back_populates="owner", cascade="all, delete-orphan")

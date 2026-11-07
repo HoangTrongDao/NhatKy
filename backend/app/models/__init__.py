@@ -4,5 +4,6 @@ from app.models.reflection import Reflection
 from app.models.goal import Goal
 from app.models.friend import FriendRequest, Friendship
 from app.models.message import Message
+from app.models.locket import Locket
 
-__all__ = ["User", "Memory", "Reflection", "Goal", "FriendRequest", "Friendship", "Message"]
+__all__ = ["User", "Memory", "Reflection", "Goal", "FriendRequest", "Friendship", "Message", "Locket"]

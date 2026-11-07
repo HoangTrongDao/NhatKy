@@ -1,7 +1,8 @@
-import { useEffect, useState, useCallback, useRef, FormEvent, ChangeEvent } from 'react'
+import { useEffect, useState, useCallback, FormEvent } from 'react'
+import { Link } from 'react-router-dom'
 import {
   BookHeart, Plus, LockKeyhole, Search, X, Pencil,
-  Camera, Sparkles, Maximize2, Calendar, Image as ImageIcon
+  Camera, Calendar, Maximize2
 } from 'lucide-react'
 import { api, User, Memory } from '../api'
 import { useToast } from './Toast'
@@ -12,44 +13,6 @@ import ConfirmDialog from './ConfirmDialog'
 import SkeletonCards from './SkeletonCards'
 
 const PAGE_SIZE = 20
-
-/**
- * Nén ảnh phía client bằng HTML5 Canvas để tối ưu tốc độ và dung lượng,
- * tự động xoay chuẩn và nén nhẹ nhàng chuẩn khoảnh khắc Locket.
- */
-function compressImage(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onerror = reject
-    reader.onload = () => {
-      const img = new Image()
-      img.onerror = reject
-      img.onload = () => {
-        const MAX_DIM = 1200
-        let { width, height } = img
-        if (width > height) {
-          if (width > MAX_DIM) {
-            height = Math.round((height * MAX_DIM) / width)
-            width = MAX_DIM
-          }
-        } else {
-          if (height > MAX_DIM) {
-            width = Math.round((width * MAX_DIM) / height)
-            height = MAX_DIM
-          }
-        }
-        const canvas = document.createElement('canvas')
-        canvas.width = width
-        canvas.height = height
-        const ctx = canvas.getContext('2d')
-        ctx?.drawImage(img, 0, 0, width, height)
-        resolve(canvas.toDataURL('image/jpeg', 0.85))
-      }
-      img.src = reader.result as string
-    }
-    reader.readAsDataURL(file)
-  })
-}
 
 export default function MemoriesPage({ user }: { user: User | null }) {
   const [items, setItems] = useState<Memory[]>([])
@@ -63,9 +26,6 @@ export default function MemoriesPage({ user }: { user: User | null }) {
   const [content, setContent] = useState('')
   const [occurred, setOccurred] = useState('')
   const [visibility, setVisibility] = useState<'private' | 'public'>('private')
-  const [imageUrl, setImageUrl] = useState<string>('')
-  const [compressing, setCompressing] = useState(false)
-  const createFileInputRef = useRef<HTMLInputElement>(null)
 
   /* ── Search/filter state ── */
   const [search, setSearch] = useState('')
@@ -77,11 +37,9 @@ export default function MemoriesPage({ user }: { user: User | null }) {
   const [editContent, setEditContent] = useState('')
   const [editOccurred, setEditOccurred] = useState('')
   const [editVisibility, setEditVisibility] = useState<'private' | 'public'>('private')
-  const [editImageUrl, setEditImageUrl] = useState<string>('')
   const [editBusy, setEditBusy] = useState(false)
-  const editFileInputRef = useRef<HTMLInputElement>(null)
 
-  /* ── Locket Lightbox Viewer ── */
+  /* ── Lightbox Viewer for existing memories with photo ── */
   const [lightboxMemory, setLightboxMemory] = useState<Memory | null>(null)
 
   const { addToast } = useToast()
@@ -123,26 +81,6 @@ export default function MemoriesPage({ user }: { user: User | null }) {
     return () => clearTimeout(t)
   }, [search, filterVis])
 
-  async function handleImagePick(e: ChangeEvent<HTMLInputElement>, isEdit = false) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    try {
-      setCompressing(true)
-      const base64 = await compressImage(file)
-      if (isEdit) {
-        setEditImageUrl(base64)
-      } else {
-        setImageUrl(base64)
-      }
-      addToast('Ảnh khoảnh khắc Locket đã sẵn sàng!', 'success')
-    } catch {
-      addToast('Không thể xử lý ảnh này. Vui lòng chọn ảnh khác.', 'error')
-    } finally {
-      setCompressing(false)
-      e.target.value = ''
-    }
-  }
-
   async function submit(e: FormEvent) {
     e.preventDefault()
     setBusy(true)
@@ -153,7 +91,6 @@ export default function MemoriesPage({ user }: { user: User | null }) {
         body: JSON.stringify({
           title,
           content,
-          image_url: imageUrl || null,
           occurred_at: occurred || null,
           visibility
         }),
@@ -162,8 +99,7 @@ export default function MemoriesPage({ user }: { user: User | null }) {
       setContent('')
       setOccurred('')
       setVisibility('private')
-      setImageUrl('')
-      addToast('Khoảnh khắc Locket đã được lưu giữ!', 'success')
+      addToast('Kỷ niệm đã được lưu giữ!', 'success')
       await load()
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Không lưu được kỷ niệm.')
@@ -189,7 +125,6 @@ export default function MemoriesPage({ user }: { user: User | null }) {
     setEditContent(item.content)
     setEditOccurred(item.occurred_at || '')
     setEditVisibility(item.visibility)
-    setEditImageUrl(item.image_url || '')
   }
 
   async function saveEdit(e: FormEvent) {
@@ -202,7 +137,6 @@ export default function MemoriesPage({ user }: { user: User | null }) {
         body: JSON.stringify({
           title: editTitle,
           content: editContent,
-          image_url: editImageUrl || null,
           occurred_at: editOccurred || null,
           visibility: editVisibility,
         }),
@@ -221,99 +155,34 @@ export default function MemoriesPage({ user }: { user: User | null }) {
     void load(true, items.length)
   }
 
-  function formatDateBadge(dateStr?: string | null) {
-    if (!dateStr) return 'Khoảnh khắc đáng nhớ'
-    try {
-      const d = new Date(dateStr)
-      return d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
-    } catch {
-      return dateStr
-    }
-  }
-
   return (
     <RequireUser user={user}>
       <div className="page subpage">
         <PageHeader
           eyebrow="GÓC KÝ ỨC ĐẸP"
-          title="Khoảnh khắc Locket của bạn."
-          description="Chụp hoặc lưu giữ những hình ảnh ấm áp nhất bên bạn bè, người thân và cuộc sống thường nhật."
+          title="Điều gì đáng được giữ lại?"
+          description="Không cần là điều lớn lao. Đôi khi chỉ một khoảnh khắc bình thường cũng đủ để ta mỉm cười khi nhớ về."
           icon={<BookHeart />}
         />
 
+        {/* Locket shortcut banner */}
+        <Link to="/locket" className="locket-invite-banner" title="Mở trang Locket">
+          <div className="locket-invite-icon">
+            <Camera size={20} />
+          </div>
+          <div className="locket-invite-text">
+            <strong>Bạn muốn chụp và gửi ảnh khoảnh khắc kiểu Locket?</strong>
+            <span>Đã có mục <strong>Locket</strong> riêng biệt với Camera trực tiếp và thả cảm xúc! Nhấn để trải nghiệm ngay →</span>
+          </div>
+        </Link>
+
         <div className="content-grid">
           {/* ── Create form ── */}
-          <form className="editor-card locket-editor-card" onSubmit={submit}>
-            <span className="eyebrow">
-              <Sparkles size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 4 }} />
-              KHOẢNH KHẮC MỚI
-            </span>
-            <h2>Lưu giữ một điều đẹp đẽ.</h2>
+          <form className="editor-card" onSubmit={submit}>
+            <span className="eyebrow">THÊM MỘT KÝ NIỆM</span>
+            <h2>Một điều đẹp đẽ bạn nhớ.</h2>
 
-            {/* ── Locket Photo Uploader & Live Preview ── */}
-            <div className="locket-upload-section">
-              <input
-                ref={createFileInputRef}
-                type="file"
-                accept="image/*"
-                style={{ display: 'none' }}
-                onChange={e => handleImagePick(e, false)}
-              />
-
-              {imageUrl ? (
-                <div className="locket-preview-container">
-                  <div className="locket-widget-frame">
-                    <img src={imageUrl} alt="Locket preview" className="locket-widget-img" />
-                    <div className="locket-overlay-top">
-                      <span className="locket-pill">
-                        <Calendar size={12} />
-                        {occurred ? formatDateBadge(occurred) : 'Hôm nay'}
-                      </span>
-                    </div>
-                    <div className="locket-overlay-bottom">
-                      <span className="locket-caption-pill">
-                        {title.trim() ? title : 'Khoảnh khắc Locket'}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="locket-preview-actions">
-                    <button
-                      type="button"
-                      className="button secondary small"
-                      onClick={() => createFileInputRef.current?.click()}
-                      disabled={compressing}
-                    >
-                      <Camera size={14} /> {compressing ? 'Đang nén…' : 'Đổi ảnh khác'}
-                    </button>
-                    <button
-                      type="button"
-                      className="button secondary small danger"
-                      onClick={() => setImageUrl('')}
-                    >
-                      <X size={14} /> Bỏ ảnh
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div
-                  className="locket-dropzone"
-                  onClick={() => createFileInputRef.current?.click()}
-                  role="button"
-                  tabIndex={0}
-                >
-                  <div className="locket-dropzone-icon">
-                    <Camera size={28} />
-                  </div>
-                  <div className="locket-dropzone-text">
-                    <strong>Chụp hoặc chọn ảnh (kiểu Locket)</strong>
-                    <span>Khung ảnh bo tròn widget lưu trọn kỷ niệm</span>
-                  </div>
-                  {compressing && <span className="locket-compress-tag">Đang xử lý ảnh…</span>}
-                </div>
-              )}
-            </div>
-
-            <label>Tiêu đề khoảnh khắc
+            <label>Tiêu đề
               <input
                 value={title}
                 onChange={e => setTitle(e.target.value)}
@@ -323,14 +192,14 @@ export default function MemoriesPage({ user }: { user: User | null }) {
               />
             </label>
 
-            <label>Câu chuyện đằng sau bức ảnh
+            <label>Câu chuyện
               <textarea
                 value={content}
                 onChange={e => setContent(e.target.value)}
                 required
                 maxLength={10000}
-                rows={4}
-                placeholder="Điều gì đã xảy ra? Vì sao khoảnh khắc này khiến bạn mỉm cười?"
+                rows={5}
+                placeholder="Điều gì đã xảy ra? Vì sao khoảnh khắc này có ý nghĩa với bạn?"
               />
             </label>
 
@@ -348,13 +217,13 @@ export default function MemoriesPage({ user }: { user: User | null }) {
             </div>
 
             <p className="field-hint">
-              <LockKeyhole size={14} /> Mặc định riêng tư an toàn. Bạn hoàn toàn có thể chia sẻ công khai khi sẵn lòng.
+              <LockKeyhole size={14} /> Mặc định riêng tư an toàn. Chỉ chia sẻ công khai khi bạn thật sự muốn lan tỏa điều tốt đẹp.
             </p>
 
             {error && <p className="error-message">{error}</p>}
 
-            <button className="button primary full" disabled={busy || compressing}>
-              <Plus size={17} />{busy ? 'Đang lưu…' : 'Lưu khoảnh khắc'}
+            <button className="button primary full" disabled={busy}>
+              <Plus size={17} />{busy ? 'Đang lưu…' : 'Lưu kỷ niệm'}
             </button>
           </form>
 
@@ -393,60 +262,14 @@ export default function MemoriesPage({ user }: { user: User | null }) {
             ) : items.length === 0 ? (
               <EmptyCard
                 title="Kệ ký ức đang chờ bạn"
-                text="Hãy lưu lại khoảnh khắc hoặc tấm ảnh đầu tiên theo phong cách Locket!"
+                text="Khi sẵn sàng, hãy bắt đầu bằng một khoảnh khắc nhỏ đáng nhớ."
               />
             ) : (
               <>
                 {items.map(item => (
                   editingId === item.id ? (
                     /* ── Edit form ── */
-                    <form key={item.id} className="data-card editing locket-editor-card" onSubmit={saveEdit}>
-                      {/* Edit photo */}
-                      <input
-                        ref={editFileInputRef}
-                        type="file"
-                        accept="image/*"
-                        style={{ display: 'none' }}
-                        onChange={e => handleImagePick(e, true)}
-                      />
-
-                      <div className="locket-upload-section">
-                        {editImageUrl ? (
-                          <div className="locket-preview-container">
-                            <div className="locket-widget-frame">
-                              <img src={editImageUrl} alt="Locket preview" className="locket-widget-img" />
-                              <div className="locket-overlay-bottom">
-                                <span className="locket-caption-pill">{editTitle || 'Khoảnh khắc Locket'}</span>
-                              </div>
-                            </div>
-                            <div className="locket-preview-actions">
-                              <button
-                                type="button"
-                                className="button secondary small"
-                                onClick={() => editFileInputRef.current?.click()}
-                              >
-                                <Camera size={14} /> Thay ảnh
-                              </button>
-                              <button
-                                type="button"
-                                className="button secondary small danger"
-                                onClick={() => setEditImageUrl('')}
-                              >
-                                <X size={14} /> Gỡ ảnh
-                              </button>
-                            </div>
-                          </div>
-                        ) : (
-                          <div
-                            className="locket-dropzone small"
-                            onClick={() => editFileInputRef.current?.click()}
-                          >
-                            <ImageIcon size={22} />
-                            <span>Thêm ảnh khoảnh khắc Locket cho kỷ niệm này</span>
-                          </div>
-                        )}
-                      </div>
-
+                    <form key={item.id} className="data-card editing" onSubmit={saveEdit}>
                       <label>Tiêu đề
                         <input
                           value={editTitle}
@@ -500,13 +323,12 @@ export default function MemoriesPage({ user }: { user: User | null }) {
                     </form>
                   ) : (
                     /* ── Display card ── */
-                    <article className={`data-card ${item.image_url ? 'has-locket-photo' : ''}`} key={item.id}>
-                      {/* ── Locket Photo Widget Presentation ── */}
+                    <article className="data-card" key={item.id}>
                       {item.image_url && (
                         <div
                           className="locket-card-widget"
                           onClick={() => setLightboxMemory(item)}
-                          title="Chạm để xem ảnh toàn màn hình"
+                          title="Chạm để xem ảnh lớn"
                         >
                           <img
                             src={item.image_url}
@@ -514,17 +336,6 @@ export default function MemoriesPage({ user }: { user: User | null }) {
                             className="locket-widget-img"
                             loading="lazy"
                           />
-                          <div className="locket-overlay-top">
-                            <span className="locket-pill">
-                              <Calendar size={11} />
-                              {formatDateBadge(item.occurred_at || item.created_at)}
-                            </span>
-                          </div>
-                          <div className="locket-overlay-bottom">
-                            <span className="locket-caption-pill">
-                              {item.title}
-                            </span>
-                          </div>
                           <button
                             type="button"
                             className="locket-zoom-hint"
@@ -575,7 +386,7 @@ export default function MemoriesPage({ user }: { user: User | null }) {
         </div>
       </div>
 
-      {/* ── Locket Fullscreen Lightbox Modal ── */}
+      {/* ── Lightbox Modal for photos ── */}
       {lightboxMemory && lightboxMemory.image_url && (
         <div
           className="locket-lightbox-overlay"
@@ -598,10 +409,6 @@ export default function MemoriesPage({ user }: { user: User | null }) {
                 alt={lightboxMemory.title}
                 className="locket-lightbox-img"
               />
-              <div className="locket-lightbox-time-pill">
-                <Calendar size={13} />
-                {formatDateBadge(lightboxMemory.occurred_at || lightboxMemory.created_at)}
-              </div>
             </div>
 
             <div className="locket-lightbox-details">

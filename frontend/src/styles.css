@@ -9632,3 +9632,671 @@ button { cursor: pointer; }
   from { opacity: 0; transform: scale(0.94); }
   to { opacity: 1; transform: scale(1); }
 }
+
+
+/* ══════════════════════════════════════════════════
+   DEDICATED LOCKET TAB & PAGE COMPREHENSIVE STYLES
+   ══════════════════════════════════════════════════ */
+
+.locket-invite-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 20px;
+  border-radius: 20px;
+  margin-bottom: 24px;
+  text-decoration: none;
+  border: 1px solid rgba(230, 103, 126, 0.3);
+  background: linear-gradient(135deg, rgba(254, 242, 242, 0.85), rgba(255, 247, 237, 0.85));
+  box-shadow: 0 4px 16px rgba(230, 103, 126, 0.08);
+  transition: all 0.25s ease;
+}
+
+.locket-invite-banner:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent, #e6677e);
+  box-shadow: 0 8px 24px rgba(230, 103, 126, 0.18);
+}
+
+.locket-invite-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #e6677e, #f0899c);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(230, 103, 126, 0.3);
+}
+
+.locket-invite-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.locket-invite-text strong {
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.locket-invite-text span {
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.locket-invite-text span strong {
+  color: var(--accent);
+}
+
+/* Locket Main Layout */
+.locket-main-layout {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 28px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .locket-main-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Locket Camera Card */
+.locket-camera-card {
+  background: var(--card);
+  border-radius: 28px;
+  border: 1px solid var(--line);
+  padding: 22px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 88px;
+}
+
+@media (max-width: 900px) {
+  .locket-camera-card {
+    position: static;
+  }
+}
+
+.locket-camera-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.locket-camera-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.locket-badge-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(230, 103, 126, 0.12);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+  animation: pulseDot 1.5s infinite;
+}
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+/* Viewfinder Frame */
+.locket-viewfinder {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 28px;
+  overflow: hidden;
+  background: #000;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.18);
+  border: 3px solid rgba(255, 255, 255, 0.85);
+  margin-bottom: 16px;
+}
+
+.locket-viewfinder.flash::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  z-index: 100;
+  animation: flashAnim 0.15s ease-out;
+}
+
+@keyframes flashAnim {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+.locket-snap-preview {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.locket-snap-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.locket-live-stream-box {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.locket-video-stream {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.locket-flip-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  z-index: 10;
+}
+
+.locket-flip-btn:hover {
+  transform: rotate(180deg);
+}
+
+.locket-camera-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 24px 20px;
+  text-align: center;
+  gap: 10px;
+  background: linear-gradient(135deg, rgba(30, 24, 26, 0.95), rgba(18, 14, 15, 0.95));
+  color: #fff;
+}
+
+.locket-cam-icon-circle {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #e6677e, #f0899c);
+  display: grid;
+  place-items: center;
+  color: #fff;
+  box-shadow: 0 6px 20px rgba(230, 103, 126, 0.4);
+  margin-bottom: 4px;
+}
+
+.locket-camera-placeholder strong {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.locket-camera-placeholder p {
+  font-size: 12.5px;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 6px;
+}
+
+.locket-error-tag {
+  font-size: 11.5px;
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.15);
+  padding: 4px 10px;
+  border-radius: 8px;
+  margin-top: 6px;
+}
+
+/* Shutter Bar Controls */
+.locket-shutter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 6px 0;
+}
+
+.locket-gallery-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.locket-gallery-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: scale(1.08);
+}
+
+.locket-shutter-button {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  border: 4px solid var(--accent, #e6677e);
+  background: transparent;
+  padding: 4px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 18px rgba(230, 103, 126, 0.25);
+}
+
+.locket-shutter-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 22px rgba(230, 103, 126, 0.4);
+}
+
+.locket-shutter-button:active {
+  transform: scale(0.92);
+}
+
+.shutter-inner-ring {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #e6677e, #f0788d);
+  display: block;
+}
+
+/* Publish Box */
+.locket-publish-box {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.locket-caption-input-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.locket-caption-input-wrap input {
+  width: 100%;
+  padding: 10px 48px 10px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 13.5px;
+}
+
+.locket-caption-input-wrap input:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.locket-caption-input-wrap small {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.locket-vis-selector {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.locket-vis-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 8px 6px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.locket-vis-btn.active {
+  background: rgba(230, 103, 126, 0.12);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.locket-action-btns {
+  display: grid;
+  grid-template-columns: 1fr 1.6fr;
+  gap: 10px;
+}
+
+/* Feed Section */
+.locket-feed-card {
+  background: var(--card);
+  border-radius: 28px;
+  border: 1px solid var(--line);
+  padding: 22px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+.locket-tab-bar {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 22px;
+  background: var(--bg);
+  padding: 5px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+}
+
+.locket-tab {
+  flex: 1;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.locket-tab.active {
+  background: var(--card);
+  color: var(--accent);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.locket-feed-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+@media (max-width: 600px) {
+  .locket-feed-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.locket-post-card {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 26px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+  transition: all 0.25s ease;
+}
+
+.locket-post-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(230, 103, 126, 0.14);
+}
+
+.locket-post-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.locket-author-info {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.locket-author-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #e6677e, #f0899c);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.locket-author-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.locket-author-info strong {
+  display: block;
+  font-size: 13px;
+  color: var(--ink);
+  line-height: 1.2;
+}
+
+.locket-author-info small {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.locket-post-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.locket-vis-pill {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  display: grid;
+  place-items: center;
+}
+
+.locket-del-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--muted);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.locket-del-btn:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+  background: var(--danger-bg);
+}
+
+/* Post Img Frame */
+.locket-post-img-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 22px;
+  overflow: hidden;
+  background: #000;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+.locket-post-img-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.locket-post-img-frame:hover img {
+  transform: scale(1.03);
+}
+
+.locket-tap-hint {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  opacity: 0.8;
+  transition: all 0.2s;
+}
+
+.locket-post-img-frame:hover .locket-tap-hint {
+  opacity: 1;
+  transform: scale(1.1);
+  background: rgba(230, 103, 126, 0.9);
+}
+
+/* Reactions Bar */
+.locket-reactions-bar {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.locket-react-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--ink);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-size: 13px;
+}
+
+.locket-react-btn:hover {
+  transform: scale(1.12);
+  border-color: var(--accent);
+}
+
+.locket-react-btn.reacted {
+  background: rgba(230, 103, 126, 0.14);
+  border-color: var(--accent);
+  box-shadow: 0 2px 8px rgba(230, 103, 126, 0.2);
+}
+
+.react-emoji {
+  font-size: 13.5px;
+  line-height: 1;
+}
+
+.react-count {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+/* Empty State */
+.locket-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 48px 24px;
+  gap: 12px;
+}
+
+.locket-empty-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(254, 242, 242, 0.9), rgba(255, 247, 237, 0.9));
+  color: var(--accent);
+  display: grid;
+  place-items: center;
+  margin-bottom: 4px;
+  box-shadow: 0 8px 24px rgba(230, 103, 126, 0.15);
+}
+
+.locket-empty-state h3 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.locket-empty-state p {
+  font-size: 13.5px;
+  color: var(--muted);
+  max-width: 380px;
+  margin: 0 0 10px;
+  line-height: 1.5;
+}
+
+/* Dark mode overrides for Locket */
+[data-theme="dark"] .locket-invite-banner {
+  background: linear-gradient(135deg, rgba(46, 26, 32, 0.8), rgba(38, 28, 30, 0.8));
+  border-color: rgba(230, 103, 126, 0.35);
+}
+
+[data-theme="dark"] .locket-empty-icon {
+  background: linear-gradient(135deg, rgba(46, 26, 32, 0.9), rgba(38, 28, 30, 0.9));
+}

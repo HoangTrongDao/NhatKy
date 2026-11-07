@@ -144,3 +144,27 @@ class ConversationOut(BaseModel):
     friend: UserPublicOut
     last_message: MessageOut | None = None
     unread_count: int = 0
+
+
+# ── Lockets ───────────────────────────────────────────────
+
+class LocketCreate(BaseModel):
+    image_url: str = Field(min_length=1)
+    caption: str = Field(default="", max_length=255)
+    visibility: Literal["friends", "public", "private"] = "friends"
+
+
+class LocketReact(BaseModel):
+    emoji: str = Field(min_length=1, max_length=10)
+
+
+class LocketOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    user_id: int
+    image_url: str
+    caption: str = ""
+    visibility: str = "friends"
+    reactions: dict[str, list[int]] = Field(default_factory=dict)
+    created_at: datetime
+    owner: UserPublicOut | None = None
