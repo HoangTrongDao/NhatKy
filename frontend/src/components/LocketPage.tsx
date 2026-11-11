@@ -414,6 +414,877 @@ export default function LocketPage({ user }: { user: User | null }) {
 
   return (
     <RequireUser user={user}>
+      {/* ── Scoped Full-Width & Bright Warm Theme Styles ── */}
+      <style>{`
+        .locket-page-wrapper {
+          width: 100% !important;
+          max-width: 100% !important;
+          margin: 0 !important;
+          padding: 0 16px 40px !important;
+          box-sizing: border-box !important;
+        }
+
+        /* Nav Mode Bar */
+        .locket-nav-mode-bar {
+          display: flex;
+          justify-content: center;
+          margin-bottom: 24px;
+          width: 100%;
+        }
+        .locket-nav-mode-pills {
+          display: inline-flex;
+          background: #fcf7f2;
+          padding: 6px;
+          border-radius: 999px;
+          border: 1px solid rgba(230, 103, 126, 0.2);
+          box-shadow: 0 4px 16px rgba(230, 103, 126, 0.08);
+          gap: 6px;
+        }
+        .locket-mode-btn {
+          border: none;
+          background: transparent;
+          color: #7a5e66;
+          font-weight: 700;
+          font-size: 14px;
+          padding: 9px 20px;
+          border-radius: 999px;
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          cursor: pointer;
+          transition: all 0.25s ease;
+        }
+        .locket-mode-btn:hover {
+          color: #e6677e;
+          background: rgba(230, 103, 126, 0.08);
+        }
+        .locket-mode-btn.active {
+          background: linear-gradient(135deg, #e6677e, #f27289);
+          color: #ffffff;
+          box-shadow: 0 4px 14px rgba(230, 103, 126, 0.35);
+        }
+
+        /* ── STUDIO MODE: EXPANSIVE & BRIGHT WARM ── */
+        .locket-studio-container {
+          width: 100%;
+          max-width: 100%;
+          display: flex;
+          justify-content: center;
+          align-items: flex-start;
+          padding: 4px 0 24px;
+        }
+        .locket-studio-card {
+          width: 100%;
+          max-width: 1020px;
+          background: linear-gradient(145deg, #ffffff 0%, #fffdfa 45%, #fff1f4 100%) !important;
+          border: 1.5px solid rgba(230, 103, 126, 0.22) !important;
+          border-radius: 36px !important;
+          padding: 32px !important;
+          box-shadow: 0 16px 44px rgba(230, 103, 126, 0.08), 0 2px 12px rgba(180, 120, 130, 0.04) !important;
+          display: flex;
+          flex-direction: column;
+          gap: 24px;
+          box-sizing: border-box;
+        }
+        .locket-studio-grid {
+          display: grid;
+          grid-template-columns: minmax(320px, 480px) 1fr;
+          gap: 36px;
+          align-items: center;
+        }
+        @media (max-width: 860px) {
+          .locket-studio-card {
+            padding: 20px !important;
+            border-radius: 28px !important;
+          }
+          .locket-studio-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+          }
+        }
+
+        /* Viewfinder Squircle */
+        .locket-viewfinder {
+          position: relative;
+          width: 100%;
+          max-width: 480px;
+          aspect-ratio: 1 / 1;
+          margin: 0 auto;
+          border-radius: 36px !important;
+          overflow: hidden !important;
+          background: linear-gradient(135deg, #fdf7f2 0%, #faedf0 100%) !important;
+          border: 2.5px solid rgba(230, 103, 126, 0.28) !important;
+          box-shadow: 0 12px 32px rgba(230, 103, 126, 0.12), inset 0 2px 8px rgba(230, 103, 126, 0.05) !important;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: border-color 0.25s ease;
+        }
+        .locket-viewfinder.flash {
+          filter: brightness(1.7);
+        }
+
+        /* Live Stream Box */
+        .locket-live-stream-box {
+          position: relative;
+          width: 100%;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: #fbf3ec;
+        }
+        .locket-video-stream {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+        }
+        .locket-camera-loading-overlay {
+          position: absolute;
+          inset: 0;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          background: rgba(255, 252, 248, 0.9) !important;
+          backdrop-filter: blur(8px);
+          color: #5a2835 !important;
+          font-size: 13.5px;
+          font-weight: 700;
+          gap: 12px;
+          z-index: 5;
+        }
+        .locket-flip-btn {
+          position: absolute;
+          top: 16px;
+          right: 16px;
+          width: 44px;
+          height: 44px;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.9) !important;
+          backdrop-filter: blur(10px);
+          border: 1.5px solid rgba(230, 103, 126, 0.3) !important;
+          color: #e6677e !important;
+          display: grid;
+          place-items: center;
+          cursor: pointer;
+          transition: transform 0.3s ease, background 0.2s ease;
+          box-shadow: 0 4px 14px rgba(230, 103, 126, 0.2) !important;
+          z-index: 10;
+        }
+        .locket-flip-btn:hover {
+          transform: rotate(180deg);
+          background: #ffffff !important;
+        }
+
+        /* Dropzone (Upload Mode) */
+        .locket-dropzone {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          width: 100%;
+          height: 100%;
+          min-height: 360px;
+          padding: 32px 24px;
+          text-align: center;
+          gap: 14px;
+          cursor: pointer;
+          color: #38242a !important;
+          transition: all 0.25s ease;
+          background: linear-gradient(135deg, #fffdfb 0%, #fdf6f1 60%, #fff1f4 100%) !important;
+          border: 2px dashed rgba(230, 103, 126, 0.35) !important;
+        }
+        .locket-dropzone:hover,
+        .locket-dropzone.dragover {
+          background: linear-gradient(135deg, #ffffff 0%, #faedf0 100%) !important;
+          border-color: #e6677e !important;
+          transform: scale(1.01);
+          box-shadow: 0 10px 28px rgba(230, 103, 126, 0.15);
+        }
+        .locket-dropzone-icon {
+          width: 76px;
+          height: 76px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #e6677e, #f27289);
+          display: grid;
+          place-items: center;
+          color: #ffffff !important;
+          box-shadow: 0 8px 24px rgba(230, 103, 126, 0.32);
+        }
+        .locket-dropzone strong {
+          font-size: 16px;
+          font-weight: 800;
+          color: #38242a !important;
+        }
+        .locket-dropzone p {
+          font-size: 13px;
+          color: #7f6068 !important;
+          margin: 0;
+          max-width: 290px;
+          line-height: 1.5;
+        }
+
+        /* Camera Error Fallback */
+        .locket-camera-fallback {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          width: 100%;
+          height: 100%;
+          min-height: 360px;
+          padding: 28px 24px;
+          text-align: center;
+          gap: 14px;
+          background: linear-gradient(135deg, #fff8f8 0%, #fdeef0 100%) !important;
+          color: #4a222a !important;
+          border: 1.5px solid rgba(230, 103, 126, 0.35) !important;
+        }
+        .locket-camera-fallback strong {
+          font-size: 16px;
+          font-weight: 800;
+          color: #e6677e !important;
+        }
+        .locket-camera-fallback p {
+          font-size: 12.5px;
+          color: #7f525c !important;
+          margin: 0;
+          line-height: 1.5;
+        }
+
+        /* Snapped Photo Preview */
+        .locket-snap-preview {
+          position: relative;
+          width: 100%;
+          height: 100%;
+        }
+        .locket-snap-img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+        }
+        .locket-overlay-top {
+          position: absolute;
+          top: 14px;
+          left: 14px;
+          z-index: 10;
+        }
+        .locket-pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          background: rgba(255, 255, 255, 0.92) !important;
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(230, 103, 126, 0.3) !important;
+          color: #b83d54 !important;
+          padding: 6px 14px;
+          border-radius: 999px;
+          font-size: 12px;
+          font-weight: 700;
+          box-shadow: 0 4px 14px rgba(230, 103, 126, 0.15) !important;
+        }
+        .locket-floating-caption {
+          position: absolute;
+          bottom: 14px;
+          left: 14px;
+          right: 14px;
+          z-index: 10;
+        }
+        .locket-floating-caption input {
+          width: 100%;
+          background: rgba(255, 255, 255, 0.94) !important;
+          backdrop-filter: blur(12px);
+          border: 1.5px solid rgba(230, 103, 126, 0.35) !important;
+          color: #38242a !important;
+          border-radius: 999px;
+          padding: 10px 18px;
+          font-size: 13.5px;
+          font-weight: 600;
+          box-shadow: 0 6px 20px rgba(70, 30, 40, 0.12) !important;
+          box-sizing: border-box;
+          outline: none;
+        }
+        .locket-floating-caption input:focus {
+          border-color: #e6677e !important;
+          box-shadow: 0 6px 22px rgba(230, 103, 126, 0.25) !important;
+        }
+        .locket-floating-caption input::placeholder {
+          color: #9d7c86 !important;
+        }
+
+        /* Source Toggle */
+        .locket-source-toggle {
+          display: flex;
+          background: #fdf5f0;
+          padding: 5px;
+          border-radius: 999px;
+          border: 1px solid rgba(230, 103, 126, 0.18);
+          gap: 6px;
+          width: 100%;
+        }
+        .locket-source-btn {
+          flex: 1;
+          border: none;
+          background: transparent;
+          color: #72525a;
+          font-weight: 700;
+          font-size: 13.5px;
+          padding: 9px 14px;
+          border-radius: 999px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          cursor: pointer;
+          transition: all 0.25s ease;
+        }
+        .locket-source-btn:hover {
+          color: #e6677e;
+          background: rgba(230, 103, 126, 0.08);
+        }
+        .locket-source-btn.active {
+          background: linear-gradient(135deg, #e6677e, #f27289) !important;
+          color: #ffffff !important;
+          box-shadow: 0 4px 14px rgba(230, 103, 126, 0.28) !important;
+        }
+
+        /* Controls Panel */
+        .locket-controls-container {
+          display: flex;
+          flex-direction: column;
+          gap: 18px;
+          width: 100%;
+        }
+        .locket-studio-side-panel {
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
+          width: 100%;
+        }
+
+        /* Shutter Bar */
+        .locket-shutter-bar {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 28px;
+          padding: 8px 0;
+        }
+        .locket-shutter-button {
+          width: 76px;
+          height: 76px;
+          border-radius: 50%;
+          border: none;
+          background: linear-gradient(135deg, #e6677e, #f27289) !important;
+          box-shadow: 0 8px 26px rgba(230, 103, 126, 0.4) !important;
+          display: grid;
+          place-items: center;
+          cursor: pointer;
+          transition: transform 0.15s ease, box-shadow 0.2s ease;
+        }
+        .locket-shutter-button:hover {
+          transform: scale(1.06);
+          box-shadow: 0 10px 30px rgba(230, 103, 126, 0.5) !important;
+        }
+        .locket-shutter-button:active {
+          transform: scale(0.94);
+        }
+        .shutter-inner-ring {
+          width: 58px;
+          height: 58px;
+          border-radius: 50%;
+          border: 3px solid #ffffff;
+          display: block;
+        }
+        .locket-gallery-btn {
+          width: 48px;
+          height: 48px;
+          border-radius: 50%;
+          background: #ffffff !important;
+          border: 1.5px solid rgba(230, 103, 126, 0.25) !important;
+          color: #e6677e !important;
+          display: grid;
+          place-items: center;
+          cursor: pointer;
+          box-shadow: 0 4px 14px rgba(230, 103, 126, 0.12) !important;
+          transition: all 0.2s ease;
+        }
+        .locket-gallery-btn:hover {
+          transform: translateY(-2px);
+          border-color: #e6677e !important;
+          background: #fff0f3 !important;
+        }
+
+        /* Visibility Selector */
+        .locket-vis-selector {
+          display: flex;
+          background: #fdf5f0;
+          padding: 4px;
+          border-radius: 999px;
+          border: 1px solid rgba(230, 103, 126, 0.18);
+          gap: 6px;
+          width: 100%;
+        }
+        .locket-vis-btn {
+          flex: 1;
+          border: none;
+          background: transparent;
+          color: #72525a;
+          font-weight: 700;
+          font-size: 13px;
+          padding: 8px 12px;
+          border-radius: 999px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+        .locket-vis-btn:hover {
+          color: #e6677e;
+        }
+        .locket-vis-btn.active {
+          background: #ffffff !important;
+          color: #e6677e !important;
+          box-shadow: 0 2px 8px rgba(230, 103, 126, 0.2) !important;
+        }
+        .locket-publish-box {
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+          width: 100%;
+        }
+        .locket-action-btns {
+          display: flex;
+          gap: 12px;
+          width: 100%;
+        }
+        .locket-action-btns button {
+          flex: 1;
+        }
+
+        /* Cozy studio hint card */
+        .locket-studio-hint-card {
+          background: linear-gradient(135deg, #fffcf9, #fbf2ea);
+          border: 1px solid rgba(230, 103, 126, 0.16);
+          border-radius: 20px;
+          padding: 16px 18px;
+          display: flex;
+          align-items: flex-start;
+          gap: 12px;
+          font-size: 12.5px;
+          color: #785860;
+          line-height: 1.5;
+        }
+        .locket-studio-hint-icon {
+          color: #e6677e;
+          flex-shrink: 0;
+          margin-top: 2px;
+        }
+
+        /* ── TIMELINE MODE: EXPANSIVE FULL-WIDTH GRID ── */
+        .locket-timeline-section {
+          width: 100% !important;
+          max-width: 100% !important;
+          margin: 0 !important;
+          padding: 0 !important;
+        }
+        .locket-timeline-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 16px;
+          margin-bottom: 24px;
+          width: 100%;
+        }
+        .locket-feed-filter-pills {
+          display: inline-flex;
+          background: #fcf7f2;
+          padding: 5px;
+          border-radius: 999px;
+          border: 1px solid rgba(230, 103, 126, 0.18);
+          gap: 6px;
+        }
+        .locket-feed-filter-btn {
+          border: none;
+          background: transparent;
+          color: #7a5e66;
+          font-weight: 700;
+          font-size: 13px;
+          padding: 8px 16px;
+          border-radius: 999px;
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+        .locket-feed-filter-btn:hover {
+          color: #e6677e;
+        }
+        .locket-feed-filter-btn.active {
+          background: #ffffff !important;
+          color: #e6677e !important;
+          box-shadow: 0 2px 10px rgba(230, 103, 126, 0.2) !important;
+        }
+
+        /* Expansive Widgets Grid */
+        .locket-widgets-grid {
+          display: grid !important;
+          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important;
+          gap: 24px !important;
+          width: 100% !important;
+          margin: 0 !important;
+        }
+        @media (max-width: 680px) {
+          .locket-widgets-grid {
+            grid-template-columns: 1fr !important;
+            gap: 18px !important;
+          }
+        }
+
+        /* Single Widget Card */
+        .locket-widget-card {
+          background: linear-gradient(145deg, #ffffff 0%, #fffdfa 55%, #fff1f4 100%) !important;
+          border: 1.5px solid rgba(230, 103, 126, 0.18) !important;
+          border-radius: 28px !important;
+          padding: 18px !important;
+          box-shadow: 0 8px 24px rgba(230, 103, 126, 0.08), 0 2px 8px rgba(0, 0, 0, 0.02) !important;
+          display: flex;
+          flex-direction: column;
+          gap: 14px;
+          transition: transform 0.25s ease, box-shadow 0.25s ease !important;
+          box-sizing: border-box;
+        }
+        .locket-widget-card:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 16px 36px rgba(230, 103, 126, 0.16) !important;
+        }
+        .locket-widget-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+        .locket-widget-author {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+        .locket-author-avatar {
+          width: 38px;
+          height: 38px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #e6677e, #f27289);
+          color: #ffffff;
+          display: grid;
+          place-items: center;
+          font-weight: 800;
+          font-size: 14px;
+          overflow: hidden;
+          box-shadow: 0 3px 10px rgba(230, 103, 126, 0.25);
+        }
+        .locket-author-avatar img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+        .locket-author-text {
+          display: flex;
+          flex-direction: column;
+        }
+        .locket-author-text strong {
+          font-size: 14px;
+          font-weight: 700;
+          color: #38242a;
+        }
+        .locket-author-text small {
+          font-size: 12px;
+          color: #8c6e76;
+        }
+        .locket-delete-btn {
+          border: none;
+          background: #fdf5f0;
+          color: #8c6e76;
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          display: grid;
+          place-items: center;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+        .locket-delete-btn:hover {
+          background: #fee2e2;
+          color: #ef4444;
+        }
+
+        /* Widget Photo Wrap */
+        .locket-widget-photo-wrap {
+          position: relative;
+          width: 100%;
+          aspect-ratio: 1 / 1;
+          border-radius: 22px;
+          overflow: hidden;
+          cursor: pointer;
+          background: #faf2ec;
+          border: 1px solid rgba(230, 103, 126, 0.14);
+        }
+        .locket-widget-photo-wrap img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+          transition: transform 0.35s ease;
+        }
+        .locket-widget-photo-wrap:hover img {
+          transform: scale(1.03);
+        }
+        .locket-photo-time-badge {
+          position: absolute;
+          bottom: 10px;
+          left: 10px;
+          background: rgba(255, 255, 255, 0.92) !important;
+          backdrop-filter: blur(8px);
+          border: 1px solid rgba(230, 103, 126, 0.25) !important;
+          color: #5a2835 !important;
+          border-radius: 999px;
+          padding: 4px 10px;
+          font-size: 11.5px;
+          font-weight: 700;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        .locket-photo-zoom-hint {
+          position: absolute;
+          top: 10px;
+          right: 10px;
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.9) !important;
+          color: #e6677e !important;
+          border: 1px solid rgba(230, 103, 126, 0.25) !important;
+          display: grid;
+          place-items: center;
+          opacity: 0;
+          transform: scale(0.85);
+          transition: all 0.2s ease;
+          box-shadow: 0 2px 8px rgba(230, 103, 126, 0.15);
+        }
+        .locket-widget-photo-wrap:hover .locket-photo-zoom-hint {
+          opacity: 1;
+          transform: scale(1);
+        }
+        .locket-widget-caption {
+          font-size: 14px;
+          font-weight: 600;
+          color: #38242a !important;
+          line-height: 1.45;
+          margin: 0;
+          padding: 2px 4px;
+        }
+
+        /* Reactions Bar */
+        .locket-reactions-bar {
+          display: flex;
+          gap: 6px;
+          flex-wrap: wrap;
+          align-items: center;
+        }
+        .locket-react-btn {
+          border: 1px solid rgba(230, 103, 126, 0.2) !important;
+          background: #ffffff !important;
+          color: #422830 !important;
+          border-radius: 999px;
+          padding: 5px 10px;
+          font-size: 13px;
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+        .locket-react-btn:hover {
+          transform: scale(1.12);
+          border-color: #e6677e !important;
+          background: #fff0f3 !important;
+        }
+        .locket-react-btn.reacted {
+          background: #fdebee !important;
+          border-color: #e6677e !important;
+          box-shadow: 0 2px 8px rgba(230, 103, 126, 0.22) !important;
+          font-weight: 700;
+          color: #b83d54 !important;
+        }
+        .react-count {
+          font-size: 11.5px;
+          font-weight: 700;
+        }
+
+        /* Empty State */
+        .locket-empty-state {
+          background: linear-gradient(145deg, #ffffff 0%, #fffcf8 60%, #fff0f3 100%) !important;
+          border: 1.5px solid rgba(230, 103, 126, 0.2) !important;
+          border-radius: 32px !important;
+          padding: 56px 24px;
+          text-align: center;
+          color: #38242a !important;
+          box-shadow: 0 12px 36px rgba(230, 103, 126, 0.08);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 16px;
+          width: 100%;
+        }
+        .locket-empty-icon {
+          width: 80px;
+          height: 80px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #fff0f3, #fdebee);
+          border: 2px solid rgba(230, 103, 126, 0.25);
+          display: grid;
+          place-items: center;
+          color: #e6677e;
+          box-shadow: 0 8px 24px rgba(230, 103, 126, 0.16);
+        }
+        .locket-empty-state h3 {
+          margin: 0;
+          font-size: 18px;
+          font-weight: 800;
+          color: #38242a;
+        }
+        .locket-empty-state p {
+          margin: 0;
+          font-size: 13.5px;
+          color: #846870;
+          max-width: 440px;
+          line-height: 1.5;
+        }
+
+        /* ── LIGHTBOX MODAL: WARM BLUR BACKDROP & CARD ── */
+        .locket-lightbox-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(56, 32, 38, 0.65) !important;
+          backdrop-filter: blur(12px) !important;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+          padding: 20px;
+          box-sizing: border-box;
+        }
+        .locket-lightbox-card {
+          position: relative;
+          background: linear-gradient(145deg, #ffffff 0%, #fffdfa 55%, #fff1f4 100%) !important;
+          border: 1.5px solid rgba(230, 103, 126, 0.25) !important;
+          border-radius: 32px !important;
+          box-shadow: 0 24px 60px rgba(70, 30, 40, 0.25) !important;
+          overflow: hidden;
+          max-width: 900px;
+          width: 100%;
+          display: grid;
+          grid-template-columns: minmax(320px, 1fr) 340px;
+          box-sizing: border-box;
+        }
+        @media (max-width: 760px) {
+          .locket-lightbox-card {
+            grid-template-columns: 1fr;
+            max-height: 90vh;
+            overflow-y: auto;
+          }
+        }
+        .locket-lightbox-close {
+          position: absolute;
+          top: 14px;
+          right: 14px;
+          width: 38px;
+          height: 38px;
+          border-radius: 50%;
+          border: 1px solid rgba(230, 103, 126, 0.25);
+          background: #ffffff;
+          color: #e6677e;
+          display: grid;
+          place-items: center;
+          cursor: pointer;
+          z-index: 20;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+          transition: all 0.2s ease;
+        }
+        .locket-lightbox-close:hover {
+          transform: scale(1.08);
+          background: #fff0f3;
+        }
+        .locket-lightbox-photo-wrap {
+          position: relative;
+          background: #faf3ec;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 340px;
+        }
+        .locket-lightbox-img {
+          width: 100%;
+          height: 100%;
+          max-height: 520px;
+          object-fit: cover;
+          display: block;
+        }
+        .locket-lightbox-time-pill {
+          position: absolute;
+          bottom: 14px;
+          left: 14px;
+          background: rgba(255, 255, 255, 0.92);
+          backdrop-filter: blur(8px);
+          border: 1px solid rgba(230, 103, 126, 0.25);
+          color: #5a2835;
+          padding: 6px 14px;
+          border-radius: 999px;
+          font-size: 12px;
+          font-weight: 700;
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+        }
+        .locket-lightbox-details {
+          padding: 28px 24px;
+          display: flex;
+          flex-direction: column;
+          gap: 18px;
+          justify-content: space-between;
+        }
+        .locket-lightbox-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+        .locket-author-info {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+        .locket-author-info strong {
+          font-size: 15px;
+          font-weight: 700;
+          color: #38242a;
+        }
+        .locket-lightbox-story {
+          font-size: 15px;
+          font-weight: 500;
+          color: #422830;
+          line-height: 1.5;
+          margin: 0;
+          padding: 12px 14px;
+          background: #fdf6f2;
+          border-radius: 16px;
+          border: 1px solid rgba(230, 103, 126, 0.14);
+        }
+      `}</style>
+
       <div className="page subpage locket-page-wrapper">
         <PageHeader
           eyebrow="LOCKET WIDGET"
@@ -454,252 +1325,278 @@ export default function LocketPage({ user }: { user: User | null }) {
         </div>
 
         {/* ══════════════════════════════════════════════════════════════════
-            CHẾ ĐỘ 1: STUDIO CHỤP LOCKET (IPHONE VIEW-FINDER DESIGN)
+            CHẾ ĐỘ 1: STUDIO CHỤP LOCKET (RESPONSIVE WIDE LAYOUT & WARM THEME)
            ══════════════════════════════════════════════════════════════════ */}
         {pageMode === 'studio' && (
           <div className="locket-studio-container">
             <div className="locket-studio-card">
-              {/* Toggle Source: Camera vs Tải ảnh */}
-              {!capturedPhoto && (
-                <div className="locket-source-toggle">
-                  <button
-                    type="button"
-                    className={`locket-source-btn ${captureSource === 'camera' ? 'active' : ''}`}
-                    onClick={() => void switchToCamera()}
-                  >
-                    <Camera size={14} /> Camera trực tiếp
-                  </button>
-                  <button
-                    type="button"
-                    className={`locket-source-btn ${captureSource === 'upload' ? 'active' : ''}`}
-                    onClick={switchToUpload}
-                  >
-                    <ImageIcon size={14} /> Tải ảnh lên
-                  </button>
-                </div>
-              )}
+              {/* Responsive 2-Column Grid on Wide Displays */}
+              <div className="locket-studio-grid">
+                {/* ── Left Column: Viewfinder Squircle ── */}
+                <div className="locket-studio-left">
+                  <div className={`locket-viewfinder ${isFlashActive ? 'flash' : ''}`}>
+                    {capturedPhoto ? (
+                      /* Ảnh đã chụp / tải lên -> Xem trước & Thêm caption */
+                      <div className="locket-snap-preview">
+                        <img src={capturedPhoto} alt="Captured Locket" className="locket-snap-img" />
+                        <div className="locket-overlay-top">
+                          <span className="locket-pill">
+                            <Sparkles size={13} /> Khoảnh khắc vừa chụp
+                          </span>
+                        </div>
 
-              {/* Viewfinder Squircle (Khung hình chính) */}
-              <div className={`locket-viewfinder ${isFlashActive ? 'flash' : ''}`}>
-                {capturedPhoto ? (
-                  /* Ảnh đã chụp / tải lên -> Xem trước & Thêm caption */
-                  <div className="locket-snap-preview">
-                    <img src={capturedPhoto} alt="Captured Locket" className="locket-snap-img" />
-                    <div className="locket-overlay-top">
-                      <span className="locket-pill">
-                        <Sparkles size={12} /> Khoảnh khắc vừa chụp
+                        {/* Floating Caption Input on Photo */}
+                        <div className="locket-floating-caption">
+                          <input
+                            type="text"
+                            placeholder="Viết một ghi chú ngắn cho khoảnh khắc này…"
+                            value={caption}
+                            onChange={e => setCaption(e.target.value)}
+                            maxLength={140}
+                            autoFocus
+                          />
+                        </div>
+                      </div>
+                    ) : captureSource === 'camera' ? (
+                      /* Chế độ Camera */
+                      isCameraActive ? (
+                        <div className="locket-live-stream-box">
+                          <video
+                            ref={bindVideoRef}
+                            autoPlay
+                            playsInline
+                            muted
+                            onLoadedData={() => setIsVideoReady(true)}
+                            onCanPlay={() => setIsVideoReady(true)}
+                            className="locket-video-stream"
+                            style={{ transform: facingMode === 'user' ? 'scaleX(-1)' : 'none' }}
+                          />
+
+                          {(cameraLoading || !isVideoReady) && (
+                            <div className="locket-camera-loading-overlay">
+                              <RefreshCw size={26} className="locket-spinner" />
+                              <span>Đang kết nối camera...</span>
+                            </div>
+                          )}
+
+                          <button
+                            type="button"
+                            className="locket-flip-btn"
+                            onClick={() => void toggleFacingMode()}
+                            title="Đổi camera trước/sau"
+                          >
+                            <RefreshCw size={18} />
+                          </button>
+                        </div>
+                      ) : cameraError ? (
+                        /* Lỗi mở Camera -> Hiển thị chuyển nhanh sang tải ảnh */
+                        <div className="locket-camera-fallback">
+                          <AlertCircle size={40} color="#e6677e" />
+                          <strong>Không thể mở Camera</strong>
+                          <p>{cameraError}</p>
+                          <button
+                            type="button"
+                            className="button primary small"
+                            style={{ marginTop: 8 }}
+                            onClick={switchToUpload}
+                          >
+                            <ImageIcon size={14} /> Chuyển sang tải ảnh từ máy
+                          </button>
+                        </div>
+                      ) : (
+                        /* Trạng thái chuẩn bị */
+                        <div className="locket-dropzone" onClick={() => void startCamera()}>
+                          <div className="locket-dropzone-icon">
+                            <Camera size={34} />
+                          </div>
+                          <strong>Bật Camera Locket</strong>
+                          <p>Nhấp vào đây để mở camera và bắt đầu chụp ảnh trực tiếp</p>
+                          <button type="button" className="button primary small" style={{ marginTop: 6 }}>
+                            Mở Camera ngay
+                          </button>
+                        </div>
+                      )
+                    ) : (
+                      /* Chế độ Tải ảnh (Dropzone) */
+                      <div
+                        className={`locket-dropzone ${isDragOver ? 'dragover' : ''}`}
+                        onClick={() => fileInputRef.current?.click()}
+                        onDragOver={handleDragOver}
+                        onDragLeave={handleDragLeave}
+                        onDrop={e => void handleDrop(e)}
+                      >
+                        <div className="locket-dropzone-icon">
+                          <UploadCloud size={34} />
+                        </div>
+                        <strong>Kéo thả ảnh vào đây</strong>
+                        <p>Hoặc nhấp để chọn ảnh từ máy tính hoặc điện thoại của bạn</p>
+                        <button type="button" className="button secondary small" style={{ marginTop: 6 }}>
+                          <ImageIcon size={14} /> Chọn ảnh từ máy
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* ── Right Column: Studio Controls & Publish Form ── */}
+                <div className="locket-studio-side-panel">
+                  {/* Toggle Source: Camera vs Tải ảnh */}
+                  {!capturedPhoto && (
+                    <div className="locket-source-toggle">
+                      <button
+                        type="button"
+                        className={`locket-source-btn ${captureSource === 'camera' ? 'active' : ''}`}
+                        onClick={() => void switchToCamera()}
+                      >
+                        <Camera size={15} /> Camera trực tiếp
+                      </button>
+                      <button
+                        type="button"
+                        className={`locket-source-btn ${captureSource === 'upload' ? 'active' : ''}`}
+                        onClick={switchToUpload}
+                      >
+                        <ImageIcon size={15} /> Tải ảnh lên
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Điều khiển chụp & gửi */}
+                  <div className="locket-controls-container">
+                    {capturedPhoto ? (
+                      /* Form xuất bản ảnh */
+                      <div className="locket-publish-box">
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                          <label style={{ fontSize: 13, fontWeight: 700, color: '#38242a' }}>
+                            Ai có thể thấy khoảnh khắc này?
+                          </label>
+                          {/* Chọn đối tượng xem */}
+                          <div className="locket-vis-selector">
+                            <button
+                              type="button"
+                              className={`locket-vis-btn ${visibility === 'friends' ? 'active' : ''}`}
+                              onClick={() => setVisibility('friends')}
+                            >
+                              <Users size={14} /> Bạn bè
+                            </button>
+                            <button
+                              type="button"
+                              className={`locket-vis-btn ${visibility === 'public' ? 'active' : ''}`}
+                              onClick={() => setVisibility('public')}
+                            >
+                              <Globe size={14} /> Công khai
+                            </button>
+                            <button
+                              type="button"
+                              className={`locket-vis-btn ${visibility === 'private' ? 'active' : ''}`}
+                              onClick={() => setVisibility('private')}
+                            >
+                              <Lock size={14} /> Riêng tư
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="locket-action-btns">
+                          <button
+                            type="button"
+                            className="button secondary"
+                            onClick={retakePhoto}
+                            disabled={sending}
+                          >
+                            <RefreshCw size={15} /> Chụp lại
+                          </button>
+                          <button
+                            type="button"
+                            className="button primary"
+                            onClick={() => void handleSendLocket()}
+                            disabled={sending}
+                          >
+                            <Send size={15} /> {sending ? 'Đang gửi…' : 'Gửi Locket ✨'}
+                          </button>
+                        </div>
+                      </div>
+                    ) : captureSource === 'camera' && isCameraActive ? (
+                      /* Shutter Bar khi Camera đang phát */
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14 }}>
+                        <div className="locket-shutter-bar">
+                          <button
+                            type="button"
+                            className="locket-gallery-btn"
+                            onClick={switchToUpload}
+                            title="Chọn ảnh từ thư viện"
+                          >
+                            <ImageIcon size={20} />
+                          </button>
+
+                          <button
+                            type="button"
+                            className="locket-shutter-button"
+                            onClick={() => void capturePhoto()}
+                            aria-label="Chụp ảnh"
+                          >
+                            <span className="shutter-inner-ring" />
+                          </button>
+
+                          <button
+                            type="button"
+                            className="locket-gallery-btn"
+                            onClick={stopCamera}
+                            title="Tắt camera"
+                          >
+                            <X size={20} />
+                          </button>
+                        </div>
+                        <span style={{ fontSize: 12.5, color: '#8c6e76', fontWeight: 600 }}>
+                          Nhấp nút tròn ở giữa để chụp khoảnh khắc
+                        </span>
+                      </div>
+                    ) : (
+                      /* Nút bổ trợ dưới đáy Studio */
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                        {captureSource === 'camera' ? (
+                          <button
+                            type="button"
+                            className="button secondary full"
+                            onClick={switchToUpload}
+                          >
+                            <ImageIcon size={15} /> Không có webcam? Bấm để tải ảnh lên
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            className="button secondary full"
+                            onClick={() => void switchToCamera()}
+                          >
+                            <Camera size={15} /> Quay lại Camera trực tiếp
+                          </button>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Friendly warm hint card */}
+                    <div className="locket-studio-hint-card">
+                      <Sparkles size={16} className="locket-studio-hint-icon" />
+                      <span>
+                        <strong>Mẹo Locket:</strong> Khoảnh khắc chân thật, không cầu kỳ. Ảnh sẽ xuất hiện ngay trên dòng thời gian và màn hình bạn bè!
                       </span>
                     </div>
 
-                    {/* Floating Caption Input */}
-                    <div className="locket-floating-caption">
-                      <input
-                        type="text"
-                        placeholder="Viết một ghi chú ngắn cho khoảnh khắc này…"
-                        value={caption}
-                        onChange={e => setCaption(e.target.value)}
-                        maxLength={140}
-                        autoFocus
-                      />
-                    </div>
+                    {/* Hidden File Input */}
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      style={{ display: 'none' }}
+                      onChange={e => void handleFileChange(e)}
+                    />
                   </div>
-                ) : captureSource === 'camera' ? (
-                  /* Chế độ Camera */
-                  isCameraActive ? (
-                    <div className="locket-live-stream-box">
-                      <video
-                        ref={bindVideoRef}
-                        autoPlay
-                        playsInline
-                        muted
-                        onLoadedData={() => setIsVideoReady(true)}
-                        onCanPlay={() => setIsVideoReady(true)}
-                        className="locket-video-stream"
-                        style={{ transform: facingMode === 'user' ? 'scaleX(-1)' : 'none' }}
-                      />
-
-                      {(cameraLoading || !isVideoReady) && (
-                        <div className="locket-camera-loading-overlay">
-                          <RefreshCw size={26} className="locket-spinner" />
-                          <span>Đang kết nối camera...</span>
-                        </div>
-                      )}
-
-                      <button
-                        type="button"
-                        className="locket-flip-btn"
-                        onClick={() => void toggleFacingMode()}
-                        title="Đổi camera trước/sau"
-                      >
-                        <RefreshCw size={18} />
-                      </button>
-                    </div>
-                  ) : cameraError ? (
-                    /* Lỗi mở Camera -> Hiển thị chuyển nhanh sang tải ảnh */
-                    <div className="locket-camera-fallback">
-                      <AlertCircle size={40} color="#f87171" />
-                      <strong>Không thể mở Camera</strong>
-                      <p>{cameraError}</p>
-                      <button
-                        type="button"
-                        className="button primary small"
-                        style={{ marginTop: 8 }}
-                        onClick={switchToUpload}
-                      >
-                        <ImageIcon size={14} /> Chuyển sang tải ảnh từ máy
-                      </button>
-                    </div>
-                  ) : (
-                    /* Trạng thái chuẩn bị */
-                    <div className="locket-dropzone" onClick={() => void startCamera()}>
-                      <div className="locket-dropzone-icon">
-                        <Camera size={34} />
-                      </div>
-                      <strong>Bật Camera Locket</strong>
-                      <p>Nhấp vào đây để mở camera và bắt đầu chụp ảnh trực tiếp</p>
-                      <button type="button" className="button primary small" style={{ marginTop: 6 }}>
-                        Mở Camera ngay
-                      </button>
-                    </div>
-                  )
-                ) : (
-                  /* Chế độ Tải ảnh (Dropzone) */
-                  <div
-                    className={`locket-dropzone ${isDragOver ? 'dragover' : ''}`}
-                    onClick={() => fileInputRef.current?.click()}
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                    onDrop={e => void handleDrop(e)}
-                  >
-                    <div className="locket-dropzone-icon">
-                      <UploadCloud size={34} />
-                    </div>
-                    <strong>Kéo thả ảnh vào đây</strong>
-                    <p>Hoặc nhấp để chọn ảnh từ máy tính hoặc điện thoại của bạn</p>
-                    <button type="button" className="button secondary small" style={{ marginTop: 6 }}>
-                      <ImageIcon size={14} /> Chọn ảnh từ máy
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Điều khiển chụp & gửi */}
-              <div className="locket-controls-container">
-                {capturedPhoto ? (
-                  /* Form xuất bản ảnh */
-                  <div className="locket-publish-box">
-                    {/* Chọn đối tượng xem */}
-                    <div className="locket-vis-selector">
-                      <button
-                        type="button"
-                        className={`locket-vis-btn ${visibility === 'friends' ? 'active' : ''}`}
-                        onClick={() => setVisibility('friends')}
-                      >
-                        <Users size={14} /> Bạn bè
-                      </button>
-                      <button
-                        type="button"
-                        className={`locket-vis-btn ${visibility === 'public' ? 'active' : ''}`}
-                        onClick={() => setVisibility('public')}
-                      >
-                        <Globe size={14} /> Công khai
-                      </button>
-                      <button
-                        type="button"
-                        className={`locket-vis-btn ${visibility === 'private' ? 'active' : ''}`}
-                        onClick={() => setVisibility('private')}
-                      >
-                        <Lock size={14} /> Riêng tư
-                      </button>
-                    </div>
-
-                    <div className="locket-action-btns">
-                      <button
-                        type="button"
-                        className="button secondary"
-                        onClick={retakePhoto}
-                        disabled={sending}
-                      >
-                        <RefreshCw size={15} /> Chụp lại
-                      </button>
-                      <button
-                        type="button"
-                        className="button primary"
-                        onClick={() => void handleSendLocket()}
-                        disabled={sending}
-                      >
-                        <Send size={15} /> {sending ? 'Đang gửi…' : 'Gửi Locket ✨'}
-                      </button>
-                    </div>
-                  </div>
-                ) : captureSource === 'camera' && isCameraActive ? (
-                  /* Shutter Bar khi Camera đang phát */
-                  <div className="locket-shutter-bar">
-                    <button
-                      type="button"
-                      className="locket-gallery-btn"
-                      onClick={switchToUpload}
-                      title="Chọn ảnh từ thư viện"
-                    >
-                      <ImageIcon size={20} />
-                    </button>
-
-                    <button
-                      type="button"
-                      className="locket-shutter-button"
-                      onClick={() => void capturePhoto()}
-                      aria-label="Chụp ảnh"
-                    >
-                      <span className="shutter-inner-ring" />
-                    </button>
-
-                    <button
-                      type="button"
-                      className="locket-gallery-btn"
-                      onClick={stopCamera}
-                      title="Tắt camera"
-                    >
-                      <X size={20} />
-                    </button>
-                  </div>
-                ) : (
-                  /* Nút bổ trợ dưới đáy Studio */
-                  <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
-                    {captureSource === 'camera' ? (
-                      <button
-                        type="button"
-                        className="button secondary full"
-                        onClick={switchToUpload}
-                      >
-                        <ImageIcon size={15} /> Bạn không có webcam? Bấm để tải ảnh lên
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        className="button secondary full"
-                        onClick={() => void switchToCamera()}
-                      >
-                        <Camera size={15} /> Quay lại Camera trực tiếp
-                      </button>
-                    )}
-                  </div>
-                )}
-
-                {/* Hidden File Input */}
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  style={{ display: 'none' }}
-                  onChange={e => void handleFileChange(e)}
-                />
+                </div>
               </div>
             </div>
           </div>
         )}
 
         {/* ══════════════════════════════════════════════════════════════════
-            CHẾ ĐỘ 2: BẢNG TIN DÒNG THỜI GIAN (REAL iOS LOCKET WIDGETS)
+            CHẾ ĐỘ 2: BẢNG TIN DÒNG THỜI GIAN (EXPANSIVE FULL-WIDTH GRID)
            ══════════════════════════════════════════════════════════════════ */}
         {pageMode === 'timeline' && (
           <div className="locket-timeline-section">
@@ -742,7 +1639,7 @@ export default function LocketPage({ user }: { user: User | null }) {
               </button>
             </div>
 
-            {/* Danh sách Widgets */}
+            {/* Danh sách Widgets Expansive Grid */}
             {loadingFeed ? (
               <div className="locket-empty-state">
                 <RefreshCw size={28} className="locket-spinner" />
@@ -858,7 +1755,7 @@ export default function LocketPage({ user }: { user: User | null }) {
         )}
 
         {/* ══════════════════════════════════════════════════════════════════
-            MODAL LIGHTBOX: XEM ẢNH FULL KÍCH THƯỚC
+            MODAL LIGHTBOX: XEM ẢNH FULL KÍCH THƯỚC (WARM FROSTED DESIGN)
            ══════════════════════════════════════════════════════════════════ */}
         {lightboxLocket && (
           <div className="locket-lightbox-overlay" onClick={() => setLightboxLocket(null)}>

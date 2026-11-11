@@ -1,7 +1,7 @@
 import { useState, useEffect, ReactNode } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import {
-  LogIn, LogOut, Menu, Moon, Sun, Sunrise,
+  LogIn, LogOut, Menu, Sunrise,
   User as UserIcon, MessageSquare, X,
   BookHeart, Leaf, Target, Users, Sparkles, Camera
 } from 'lucide-react'
@@ -13,20 +13,20 @@ interface LayoutProps {
   children: ReactNode
 }
 
-function getTheme(): 'light' | 'dark' {
-  return (localStorage.getItem('nb_theme') as 'light' | 'dark') || 'light'
+// Permanently lock theme to 'light'
+if (typeof document !== 'undefined') {
+  document.documentElement.setAttribute('data-theme', 'light')
 }
 
 export default function Layout({ user, setUser, children }: LayoutProps) {
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [theme, setTheme] = useState<'light' | 'dark'>(getTheme)
   const [unreadCount, setUnreadCount] = useState(0)
   const navigate = useNavigate()
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme)
-    localStorage.setItem('nb_theme', theme)
-  }, [theme])
+    document.documentElement.setAttribute('data-theme', 'light')
+    localStorage.setItem('nb_theme', 'light')
+  }, [])
 
   useEffect(() => {
     if (!user) {
@@ -54,14 +54,10 @@ export default function Layout({ user, setUser, children }: LayoutProps) {
     navigate('/')
   }
 
-  function toggleTheme() {
-    setTheme(prev => prev === 'light' ? 'dark' : 'light')
-  }
-
   return (
-    <div className="app-shell">
+    <div className="app-shell" style={{ width: '100%', maxWidth: '100%', minHeight: '100vh' }}>
       <header className="topbar">
-        <div className="topbar-inner">
+        <div className="topbar-inner" style={{ maxWidth: '100%', width: '100%', padding: '0 clamp(16px, 3vw, 40px)' }}>
           {/* ── Brand Logo ── */}
           <Link className="brand" to="/">
             <span className="brand-mark">
@@ -137,10 +133,6 @@ export default function Layout({ user, setUser, children }: LayoutProps) {
 
           {/* ── Topbar Actions (Desktop) ── */}
           <div className="topbar-actions">
-            <button className="theme-toggle-btn" onClick={toggleTheme} aria-label="Đổi giao diện" title={theme === 'light' ? 'Chế độ tối' : 'Chế độ sáng'}>
-              {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
-            </button>
-
             {user ? (
               <div className="user-action-group">
                 <Link to="/profile" className="user-pill" title="Xem hồ sơ">
@@ -176,7 +168,9 @@ export default function Layout({ user, setUser, children }: LayoutProps) {
         </div>
       </header>
 
-      <main className="main-content">{children}</main>
+      <main className="main-content" style={{ width: '100%', maxWidth: '100%', flex: 1, display: 'flex', flexDirection: 'column' }}>
+        {children}
+      </main>
 
       <footer className="footer">
         <div className="footer-brand">
