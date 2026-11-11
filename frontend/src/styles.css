@@ -34,6 +34,49 @@
   --danger-bg: #fdeef0;
   --serif: 'Playfair Display', Georgia, serif;
 
+  /* Nature-Inspired Pastel Color System & Varied Tones */
+  --nature-memories: #d97757;
+  --nature-memories-pastel: #faede8;
+  --nature-memories-border: #f4d3c6;
+  --nature-memories-grad: linear-gradient(135deg, #e07a5f 0%, #ea967e 100%);
+  --nature-memories-shadow: rgba(217, 119, 87, 0.32);
+
+  --nature-reflections: #588157;
+  --nature-reflections-pastel: #ebf3ec;
+  --nature-reflections-border: #cde2ce;
+  --nature-reflections-grad: linear-gradient(135deg, #609966 0%, #9dc08b 100%);
+  --nature-reflections-shadow: rgba(88, 129, 87, 0.32);
+
+  --nature-goals: #4a8b9f;
+  --nature-goals-pastel: #eaf3f7;
+  --nature-goals-border: #c8e3ed;
+  --nature-goals-grad: linear-gradient(135deg, #4a8b9f 0%, #7cb3c2 100%);
+  --nature-goals-shadow: rgba(74, 139, 159, 0.32);
+
+  --nature-community: #d9822b;
+  --nature-community-pastel: #fef3e7;
+  --nature-community-border: #f9e2c6;
+  --nature-community-grad: linear-gradient(135deg, #e69138 0%, #f6b26b 100%);
+  --nature-community-shadow: rgba(217, 130, 43, 0.32);
+
+  --nature-locket: #e76f51;
+  --nature-locket-pastel: #fbeee8;
+  --nature-locket-border: #fad4c5;
+  --nature-locket-grad: linear-gradient(135deg, #e76f51 0%, #f4a261 100%);
+  --nature-locket-shadow: rgba(231, 111, 81, 0.32);
+
+  --nature-friends: #d65b7b;
+  --nature-friends-pastel: #faedf1;
+  --nature-friends-border: #f7cedb;
+  --nature-friends-grad: linear-gradient(135deg, #d65b7b 0%, #e8849d 100%);
+  --nature-friends-shadow: rgba(214, 91, 123, 0.32);
+
+  --nature-messages: #7b68a6;
+  --nature-messages-pastel: #f0ecf7;
+  --nature-messages-border: #dfd5f0;
+  --nature-messages-grad: linear-gradient(135deg, #7b68a6 0%, #9c8eb9 100%);
+  --nature-messages-shadow: rgba(123, 104, 166, 0.32);
+
   /* Design aliases & fallbacks */
   --accent: #e6677e;
   --accent-hover: #cc4d65;
@@ -191,26 +234,55 @@ button { cursor: pointer; }
 
 
 
-.brand-mark {
-
+.brand-mark,
+.brand-mark-embossed {
   display: grid;
-
   place-items: center;
-
   width: 42px;
-
   height: 42px;
-
   border-radius: 13px;
-
-  background: linear-gradient(135deg, #e6677e, #f0788d);
-
+  background: linear-gradient(145deg, #f27289 0%, #d4516a 100%);
   color: #fff;
-
-  box-shadow: 0 4px 14px rgba(230, 103, 126, 0.35);
-
+  position: relative;
+  /* 3D Tactile Raised 'Logo Nổi' with multi-layer shadow and bevel highlight */
+  box-shadow:
+    inset 0 2px 2px rgba(255, 255, 255, 0.75),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.16),
+    0 4px 8px -1px rgba(214, 81, 106, 0.28),
+    0 8px 18px -2px rgba(184, 50, 75, 0.32);
+  border: 1px solid rgba(255, 255, 255, 0.35);
   flex-shrink: 0;
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease;
+}
 
+.brand:hover .brand-mark,
+.brand:hover .brand-mark-embossed,
+.brand-mark-embossed:hover {
+  transform: translateY(-2px) scale(1.04);
+  box-shadow:
+    inset 0 2px 3px rgba(255, 255, 255, 0.85),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.12),
+    0 8px 14px -2px rgba(214, 81, 106, 0.32),
+    0 14px 24px -2px rgba(184, 50, 75, 0.38);
+}
+
+.brand:active .brand-mark,
+.brand:active .brand-mark-embossed {
+  transform: translateY(1px) scale(0.98);
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.2),
+    0 2px 6px rgba(184, 50, 75, 0.25);
+}
+
+.brand-mark svg,
+.brand-mark-embossed svg {
+  filter: drop-shadow(0 1.5px 2px rgba(0, 0, 0, 0.22));
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.brand:hover .brand-mark svg,
+.brand:hover .brand-mark-embossed svg {
+  transform: rotate(-6deg) scale(1.08);
 }
 
 
@@ -294,30 +366,141 @@ button { cursor: pointer; }
   text-transform: uppercase;
   color: var(--muted);
   text-decoration: none;
-  transition: all 0.18s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
 }
 
-
-
-.nav-item:hover {
-
-  color: var(--ink);
-
-  background: rgba(230, 103, 126, 0.08);
-
+/* Micro tactile badge for navigation icon */
+.nav-icon-badge {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.95),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.05),
+    0 1px 3px rgba(54, 40, 43, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
 }
 
+.nav-icon-badge svg {
+  width: 13.5px;
+  height: 13.5px;
+  transition: transform 0.2s ease;
+}
 
+.nav-item:hover .nav-icon-badge {
+  background: #ffffff;
+  transform: scale(1.08);
+  box-shadow:
+    inset 0 1px 1.5px rgba(255, 255, 255, 0.95),
+    0 2px 6px rgba(54, 40, 43, 0.1);
+}
+
+.nav-item.active .nav-icon-badge {
+  background: rgba(255, 255, 255, 0.24);
+  border-color: rgba(255, 255, 255, 0.45);
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.45),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.15);
+  color: #ffffff;
+}
+
+.nav-item.active .nav-icon-badge svg {
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25));
+}
+
+.nav-item:hover {
+  color: var(--ink);
+  background: rgba(230, 103, 126, 0.08);
+}
 
 .nav-item.active {
-
   background: linear-gradient(135deg, #e6677e, #f0788d);
-
   color: #fff !important;
-
   box-shadow: 0 4px 14px rgba(230, 103, 126, 0.35);
+}
 
+/* ── Nature-Themed Individual Pastel Navigation Variants ── */
+/* Ký ức (Memories) */
+.nav-item-memories:hover {
+  color: var(--nature-memories);
+  background: var(--nature-memories-pastel);
+}
+.nav-item-memories.active {
+  background: var(--nature-memories-grad) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px var(--nature-memories-shadow) !important;
+}
+
+/* Nhìn lại (Reflections) */
+.nav-item-reflections:hover {
+  color: var(--nature-reflections);
+  background: var(--nature-reflections-pastel);
+}
+.nav-item-reflections.active {
+  background: var(--nature-reflections-grad) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px var(--nature-reflections-shadow) !important;
+}
+
+/* Ngày mai (Goals) */
+.nav-item-goals:hover {
+  color: var(--nature-goals);
+  background: var(--nature-goals-pastel);
+}
+.nav-item-goals.active {
+  background: var(--nature-goals-grad) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px var(--nature-goals-shadow) !important;
+}
+
+/* Cộng đồng (Community) */
+.nav-item-community:hover {
+  color: var(--nature-community);
+  background: var(--nature-community-pastel);
+}
+.nav-item-community.active {
+  background: var(--nature-community-grad) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px var(--nature-community-shadow) !important;
+}
+
+/* Locket */
+.nav-item-locket:hover {
+  color: var(--nature-locket);
+  background: var(--nature-locket-pastel);
+}
+.nav-item-locket.active {
+  background: var(--nature-locket-grad) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px var(--nature-locket-shadow) !important;
+}
+
+/* Bạn bè (Friends) */
+.nav-item-friends:hover {
+  color: var(--nature-friends);
+  background: var(--nature-friends-pastel);
+}
+.nav-item-friends.active {
+  background: var(--nature-friends-grad) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px var(--nature-friends-shadow) !important;
+}
+
+/* Tin nhắn (Messages) */
+.nav-item-messages:hover {
+  color: var(--nature-messages);
+  background: var(--nature-messages-pastel);
+}
+.nav-item-messages.active {
+  background: var(--nature-messages-grad) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px var(--nature-messages-shadow) !important;
 }
 
 
@@ -1400,11 +1583,156 @@ button { cursor: pointer; }
   border-radius: 10px;
   color: #fff;
   box-shadow: 0 2px 8px rgba(230, 103, 126, 0.25);
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease;
 }
 
-.page-header-icon svg {
+/* 3D Tactile Raised PageHeader Icon Badges */
+.page-header-icon-embossed {
+  position: relative;
+  border-radius: 11px;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow:
+    inset 0 1.5px 2px rgba(255, 255, 255, 0.8),
+    inset 0 -1.5px 3px rgba(0, 0, 0, 0.16),
+    0 3px 6px -1px rgba(0, 0, 0, 0.1),
+    0 6px 14px -2px rgba(0, 0, 0, 0.14);
+}
+
+.page-header-icon-embossed:hover {
+  transform: translateY(-2px) scale(1.06);
+}
+
+.page-header-icon-embossed svg {
   width: 17px;
   height: 17px;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25));
+  transition: transform 0.22s ease;
+}
+
+.page-header-icon-embossed:hover svg {
+  transform: scale(1.08);
+}
+
+/* Nature-Inspired PageHeader Icon Variants */
+.page-header-icon-memories {
+  background: var(--nature-memories-grad) !important;
+  box-shadow:
+    inset 0 1.5px 2px rgba(255, 255, 255, 0.8),
+    inset 0 -1.5px 3px rgba(0, 0, 0, 0.16),
+    0 4px 14px var(--nature-memories-shadow) !important;
+}
+
+.page-header-icon-reflections {
+  background: var(--nature-reflections-grad) !important;
+  box-shadow:
+    inset 0 1.5px 2px rgba(255, 255, 255, 0.8),
+    inset 0 -1.5px 3px rgba(0, 0, 0, 0.16),
+    0 4px 14px var(--nature-reflections-shadow) !important;
+}
+
+.page-header-icon-goals {
+  background: var(--nature-goals-grad) !important;
+  box-shadow:
+    inset 0 1.5px 2px rgba(255, 255, 255, 0.8),
+    inset 0 -1.5px 3px rgba(0, 0, 0, 0.16),
+    0 4px 14px var(--nature-goals-shadow) !important;
+}
+
+.page-header-icon-community {
+  background: var(--nature-community-grad) !important;
+  box-shadow:
+    inset 0 1.5px 2px rgba(255, 255, 255, 0.8),
+    inset 0 -1.5px 3px rgba(0, 0, 0, 0.16),
+    0 4px 14px var(--nature-community-shadow) !important;
+}
+
+.page-header-icon-locket {
+  background: var(--nature-locket-grad) !important;
+  box-shadow:
+    inset 0 1.5px 2px rgba(255, 255, 255, 0.8),
+    inset 0 -1.5px 3px rgba(0, 0, 0, 0.16),
+    0 4px 14px var(--nature-locket-shadow) !important;
+}
+
+.page-header-icon-friends {
+  background: var(--nature-friends-grad) !important;
+  box-shadow:
+    inset 0 1.5px 2px rgba(255, 255, 255, 0.8),
+    inset 0 -1.5px 3px rgba(0, 0, 0, 0.16),
+    0 4px 14px var(--nature-friends-shadow) !important;
+}
+
+.page-header-icon-messages {
+  background: var(--nature-messages-grad) !important;
+  box-shadow:
+    inset 0 1.5px 2px rgba(255, 255, 255, 0.8),
+    inset 0 -1.5px 3px rgba(0, 0, 0, 0.16),
+    0 4px 14px var(--nature-messages-shadow) !important;
+}
+
+.page-header-icon-default {
+  background: linear-gradient(135deg, #e6677e, #f0788d) !important;
+  box-shadow:
+    inset 0 1.5px 2px rgba(255, 255, 255, 0.8),
+    inset 0 -1.5px 3px rgba(0, 0, 0, 0.16),
+    0 4px 14px rgba(230, 103, 126, 0.3) !important;
+}
+
+/* ── Nature-Themed PageHeader Card Accents ── */
+.page-header.page-header-memories {
+  border-color: var(--nature-memories-border);
+  background: linear-gradient(135deg, #fffdfa 0%, var(--nature-memories-pastel) 100%);
+}
+.page-header.page-header-memories .eyebrow {
+  color: var(--nature-memories);
+}
+
+.page-header.page-header-reflections {
+  border-color: var(--nature-reflections-border);
+  background: linear-gradient(135deg, #fffdfa 0%, var(--nature-reflections-pastel) 100%);
+}
+.page-header.page-header-reflections .eyebrow {
+  color: var(--nature-reflections);
+}
+
+.page-header.page-header-goals {
+  border-color: var(--nature-goals-border);
+  background: linear-gradient(135deg, #fffdfa 0%, var(--nature-goals-pastel) 100%);
+}
+.page-header.page-header-goals .eyebrow {
+  color: var(--nature-goals);
+}
+
+.page-header.page-header-community {
+  border-color: var(--nature-community-border);
+  background: linear-gradient(135deg, #fffdfa 0%, var(--nature-community-pastel) 100%);
+}
+.page-header.page-header-community .eyebrow {
+  color: var(--nature-community);
+}
+
+.page-header.page-header-locket {
+  border-color: var(--nature-locket-border);
+  background: linear-gradient(135deg, #fffdfa 0%, var(--nature-locket-pastel) 100%);
+}
+.page-header.page-header-locket .eyebrow {
+  color: var(--nature-locket);
+}
+
+.page-header.page-header-friends {
+  border-color: var(--nature-friends-border);
+  background: linear-gradient(135deg, #fffdfa 0%, var(--nature-friends-pastel) 100%);
+}
+.page-header.page-header-friends .eyebrow {
+  color: var(--nature-friends);
+}
+
+.page-header.page-header-messages {
+  border-color: var(--nature-messages-border);
+  background: linear-gradient(135deg, #fffdfa 0%, var(--nature-messages-pastel) 100%);
+}
+.page-header.page-header-messages .eyebrow {
+  color: var(--nature-messages);
 }
 
 .page-header .eyebrow {
