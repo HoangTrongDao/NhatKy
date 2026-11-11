@@ -1,7 +1,7 @@
 import { useState, useEffect, ReactNode } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import {
-  LogIn, LogOut, Menu, Sunrise,
+  LogIn, LogOut, Menu,
   User as UserIcon, MessageSquare, X,
   BookHeart, Leaf, Target, Users, Sparkles, Camera
 } from 'lucide-react'
@@ -62,7 +62,7 @@ export default function Layout({ user, setUser, children }: LayoutProps) {
           <div className="topbar-left" style={{ display: 'flex', alignItems: 'center', gap: 'clamp(12px, 2vw, 24px)' }}>
             <Link className="brand" to="/">
               <span className="brand-mark brand-mark-embossed">
-                <Sunrise size={22} />
+                <img src="/trongdao.png.png" alt="Logo" className="brand-logo-img" />
               </span>
               <div className="brand-text">
                 <span className="brand-title">NHẬT KÝ</span>
@@ -251,7 +251,7 @@ export default function Layout({ user, setUser, children }: LayoutProps) {
       <footer className="footer">
         <div className="footer-brand">
           <span className="brand-mark brand-mark-embossed" style={{ width: 28, height: 28, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Sunrise size={18} />
+            <img src="/trongdao.png.png" alt="Logo" className="brand-logo-img" style={{ width: '100%', height: '100%' }} />
           </span>
           <strong>NHẬT KÝ CỦA TÔI</strong>
         </div>
@@ -306,7 +306,7 @@ export default function Layout({ user, setUser, children }: LayoutProps) {
           <>
             <NavLink to="/" className="mobile-bottom-item mobile-bottom-item-home">
               <span className="mobile-bottom-icon-badge">
-                <Sunrise size={19} />
+                <img src="/trongdao.png.png" alt="Trang chủ" style={{ width: 20, height: 20, borderRadius: 5, objectFit: 'contain' }} />
               </span>
               <span className="mobile-bottom-label">Trang chủ</span>
             </NavLink>

@@ -1,6 +1,6 @@
 import { useState, FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Sunrise, LockKeyhole } from 'lucide-react'
+import { LockKeyhole } from 'lucide-react'
 import { api, setToken, User } from '../api'
 import { useToast } from './Toast'
 
@@ -55,7 +55,9 @@ export default function AuthPage({ mode, onUser }: Props) {
   return (
     <div className="auth-wrap">
       <div className="auth-card">
-        <div className="auth-symbol"><Sunrise /></div>
+        <div className="auth-symbol">
+          <img src="/trongdao.png.png" alt="Logo" style={{ width: 48, height: 48, borderRadius: 14, objectFit: 'cover', display: 'block', margin: '0 auto' }} />
+        </div>
         <span className="eyebrow">
           {mode === 'login' ? 'CHÀO MỪNG BẠN TRỞ LẠI' : 'BẮT ĐẦU MỘT HÀNH TRÌNH MỚI'}
         </span>
