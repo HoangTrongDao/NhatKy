@@ -14,6 +14,7 @@ import ReflectionsPage from './components/ReflectionsPage'
 import GoalsPage from './components/GoalsPage'
 import CommunityPage from './components/CommunityPage'
 import ProfilePage from './components/ProfilePage'
+import AIAgentAssistant from './components/AIAgentAssistant'
 import { Analytics } from '@vercel/analytics/react'
 
 function App() {
@@ -58,6 +59,7 @@ function App() {
           <Route path="/profile" element={<ProfilePage user={user} onUserUpdate={setUser} />} />
           <Route path="*" element={<HomePage user={user} />} />
         </Routes>
+        <AIAgentAssistant user={user} />
       </Layout>
     </ToastProvider>
   )
