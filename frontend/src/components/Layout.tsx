@@ -58,112 +58,168 @@ export default function Layout({ user, setUser, children }: LayoutProps) {
     <div className="app-shell" style={{ width: '100%', maxWidth: '100%', minHeight: '100vh' }}>
       <header className="topbar">
         <div className="topbar-inner" style={{ maxWidth: '100%', width: '100%', padding: '0 clamp(16px, 3vw, 40px)' }}>
-          {/* ── Brand Logo ── */}
-          <Link className="brand" to="/">
-            <span className="brand-mark">
-              <Sunrise size={22} />
-            </span>
-            <div className="brand-text">
-              <span className="brand-title">NHẬT KÝ</span>
-              <span className="brand-badge">NEW BEGINNING</span>
-            </div>
-          </Link>
+          {/* ── Left Zone (Bên tay trái): Logo + Personal Nav ── */}
+          <div className="topbar-left" style={{ display: 'flex', alignItems: 'center', gap: 'clamp(12px, 2vw, 24px)' }}>
+            <Link className="brand" to="/">
+              <span className="brand-mark">
+                <Sunrise size={22} />
+              </span>
+              <div className="brand-text">
+                <span className="brand-title">NHẬT KÝ</span>
+                <span className="brand-badge">NEW BEGINNING</span>
+              </div>
+            </Link>
 
-          {/* ── Floating Island Navigation ── */}
-          <nav className={mobileOpen ? 'nav-island open' : 'nav-island'}>
-            <NavLink to="/memories" className="nav-item" onClick={() => setMobileOpen(false)}>
-              <BookHeart size={15} />
-              <span>Ký ức</span>
-            </NavLink>
-            <NavLink to="/locket" className="nav-item" onClick={() => setMobileOpen(false)}>
-              <Camera size={15} />
-              <span>Locket</span>
-            </NavLink>
-            <NavLink to="/reflections" className="nav-item" onClick={() => setMobileOpen(false)}>
-              <Leaf size={15} />
-              <span>Nhìn lại</span>
-            </NavLink>
-            <NavLink to="/goals" className="nav-item" onClick={() => setMobileOpen(false)}>
-              <Target size={15} />
-              <span>Ngày mai</span>
-            </NavLink>
-            <NavLink to="/friends" className="nav-item" onClick={() => setMobileOpen(false)}>
-              <Users size={15} />
-              <span>Bạn bè</span>
-            </NavLink>
-            {user && (
-              <NavLink to="/messages" className="nav-item nav-msg" onClick={() => setMobileOpen(false)}>
+            <nav className="nav-island nav-island-left nav-group-left">
+              <NavLink to="/memories" className="nav-item">
+                <BookHeart size={15} />
+                <span>Ký ức</span>
+              </NavLink>
+              <NavLink to="/reflections" className="nav-item">
+                <Leaf size={15} />
+                <span>Nhìn lại</span>
+              </NavLink>
+              <NavLink to="/goals" className="nav-item">
+                <Target size={15} />
+                <span>Ngày mai</span>
+              </NavLink>
+              <NavLink to="/community" className="nav-item">
+                <Sparkles size={15} />
+                <span>Cộng đồng</span>
+              </NavLink>
+            </nav>
+          </div>
+
+          {/* ── Right Zone (Bên tay phải): Social Nav + Actions ── */}
+          <div className="topbar-right" style={{ display: 'flex', alignItems: 'center', gap: 'clamp(10px, 1.5vw, 18px)' }}>
+            <nav className="nav-island nav-island-right nav-group-right">
+              <NavLink to="/locket" className="nav-item">
+                <Camera size={15} />
+                <span>Locket</span>
+              </NavLink>
+              <NavLink to="/friends" className="nav-item">
+                <Users size={15} />
+                <span>Bạn bè</span>
+              </NavLink>
+              <NavLink to="/messages" className="nav-item nav-msg">
                 <MessageSquare size={15} />
                 <span>Tin nhắn</span>
-                {unreadCount > 0 && (
+                {user && unreadCount > 0 && (
                   <span className="nav-badge-count">
                     {unreadCount > 99 ? '99+' : unreadCount}
                   </span>
                 )}
               </NavLink>
-            )}
-            <NavLink to="/community" className="nav-item" onClick={() => setMobileOpen(false)}>
-              <Sparkles size={15} />
-              <span>Cộng đồng</span>
-            </NavLink>
+            </nav>
 
-            {/* Mobile-only profile & logout inside drawer */}
-            <div className="mobile-user-drawer">
+            <div className="topbar-actions">
               {user ? (
-                <>
-                  <NavLink to="/profile" className="mobile-profile-link" onClick={() => setMobileOpen(false)}>
-                    {user.avatar_url ? (
-                      <img src={user.avatar_url} alt="" style={{ width: 22, height: 22, borderRadius: '50%', objectFit: 'cover' }} />
-                    ) : (
-                      <UserIcon size={16} />
-                    )}
-                    <span>Không gian riêng ({user.display_name})</span>
-                  </NavLink>
-                  <button className="mobile-logout-btn" onClick={() => { signOut(); setMobileOpen(false); }}>
-                    <LogOut size={16} /> Đăng xuất
+                <div className="user-action-group">
+                  <Link to="/profile" className="user-pill" title="Xem hồ sơ">
+                    <span className="user-pill-avatar">
+                      {user.avatar_url ? (
+                        <img
+                          src={user.avatar_url}
+                          alt=""
+                          className="user-pill-avatar-img"
+                          style={{ width: '100%', height: '100%', maxWidth: '100%', maxHeight: '100%', objectFit: 'cover', borderRadius: '50%', display: 'block' }}
+                        />
+                      ) : (
+                        user.display_name.charAt(0).toUpperCase()
+                      )}
+                    </span>
+                    <span className="user-pill-name">{user.display_name}</span>
+                  </Link>
+                  <button className="logout-icon-btn" onClick={signOut} title="Đăng xuất">
+                    <LogOut size={16} />
                   </button>
-                </>
+                </div>
               ) : (
-                <Link className="mobile-login-btn" to="/login" onClick={() => setMobileOpen(false)}>
-                  <LogIn size={16} /> Đăng nhập / Bắt đầu
+                <Link className="login-pill-btn" to="/login">
+                  <LogIn size={15} />
+                  <span>Đăng nhập</span>
                 </Link>
               )}
-            </div>
-          </nav>
 
-          {/* ── Topbar Actions (Desktop) ── */}
-          <div className="topbar-actions">
-            {user ? (
-              <div className="user-action-group">
-                <Link to="/profile" className="user-pill" title="Xem hồ sơ">
-                  <span className="user-pill-avatar">
-                    {user.avatar_url ? (
-                      <img
-                        src={user.avatar_url}
-                        alt=""
-                        className="user-pill-avatar-img"
-                        style={{ width: '100%', height: '100%', maxWidth: '100%', maxHeight: '100%', objectFit: 'cover', borderRadius: '50%', display: 'block' }}
-                      />
-                    ) : (
-                      user.display_name.charAt(0).toUpperCase()
-                    )}
+              <button
+                className="mobile-menu-trigger"
+                onClick={() => setMobileOpen(!mobileOpen)}
+                aria-label="Mở menu"
+              >
+                {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Mobile Navigation Drawer ── */}
+        <div className={`mobile-nav-drawer ${mobileOpen ? 'open' : ''}`}>
+          <div className="mobile-drawer-section">
+            <span className="mobile-drawer-label">Nhật ký & Khám phá</span>
+            <div className="mobile-drawer-links">
+              <NavLink to="/memories" className="nav-item" onClick={() => setMobileOpen(false)}>
+                <BookHeart size={16} />
+                <span>Ký ức</span>
+              </NavLink>
+              <NavLink to="/reflections" className="nav-item" onClick={() => setMobileOpen(false)}>
+                <Leaf size={16} />
+                <span>Nhìn lại</span>
+              </NavLink>
+              <NavLink to="/goals" className="nav-item" onClick={() => setMobileOpen(false)}>
+                <Target size={16} />
+                <span>Ngày mai</span>
+              </NavLink>
+              <NavLink to="/community" className="nav-item" onClick={() => setMobileOpen(false)}>
+                <Sparkles size={16} />
+                <span>Cộng đồng</span>
+              </NavLink>
+            </div>
+          </div>
+
+          <div className="mobile-drawer-section">
+            <span className="mobile-drawer-label">Kết nối & Xã hội</span>
+            <div className="mobile-drawer-links">
+              <NavLink to="/locket" className="nav-item" onClick={() => setMobileOpen(false)}>
+                <Camera size={16} />
+                <span>Locket</span>
+              </NavLink>
+              <NavLink to="/friends" className="nav-item" onClick={() => setMobileOpen(false)}>
+                <Users size={16} />
+                <span>Bạn bè</span>
+              </NavLink>
+              <NavLink to="/messages" className="nav-item nav-msg" onClick={() => setMobileOpen(false)}>
+                <MessageSquare size={16} />
+                <span>Tin nhắn</span>
+                {user && unreadCount > 0 && (
+                  <span className="nav-badge-count">
+                    {unreadCount > 99 ? '99+' : unreadCount}
                   </span>
-                  <span className="user-pill-name">{user.display_name}</span>
-                </Link>
-                <button className="logout-icon-btn" onClick={signOut} title="Đăng xuất">
-                  <LogOut size={16} />
+                )}
+              </NavLink>
+            </div>
+          </div>
+
+          {/* Mobile-only profile & logout inside drawer */}
+          <div className="mobile-user-drawer">
+            {user ? (
+              <>
+                <NavLink to="/profile" className="mobile-profile-link" onClick={() => setMobileOpen(false)}>
+                  {user.avatar_url ? (
+                    <img src={user.avatar_url} alt="" style={{ width: 22, height: 22, borderRadius: '50%', objectFit: 'cover' }} />
+                  ) : (
+                    <UserIcon size={16} />
+                  )}
+                  <span>Không gian riêng ({user.display_name})</span>
+                </NavLink>
+                <button className="mobile-logout-btn" onClick={() => { signOut(); setMobileOpen(false); }}>
+                  <LogOut size={16} /> Đăng xuất
                 </button>
-              </div>
+              </>
             ) : (
-              <Link className="login-pill-btn" to="/login">
-                <LogIn size={15} />
-                <span>Đăng nhập</span>
+              <Link className="mobile-login-btn" to="/login" onClick={() => setMobileOpen(false)}>
+                <LogIn size={16} /> Đăng nhập / Bắt đầu
               </Link>
             )}
-
-            <button className="mobile-menu-trigger" onClick={() => setMobileOpen(!mobileOpen)} aria-label="Mở menu">
-              {mobileOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
           </div>
         </div>
       </header>

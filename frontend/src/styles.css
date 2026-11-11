@@ -146,16 +146,31 @@ button { cursor: pointer; }
 
 
 .topbar-inner {
-  max-width: min(96%, 1680px);
+  max-width: 100%;
   width: 100%;
   height: 100%;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 clamp(16px, 2.5vw, 40px);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
   box-sizing: border-box;
+}
+
+/* ── Topbar Navigation Zones (Left & Right) ── */
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: clamp(12px, 1.8vw, 24px);
+  flex-shrink: 0;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: clamp(10px, 1.5vw, 20px);
+  flex-shrink: 0;
 }
 
 
@@ -250,7 +265,11 @@ button { cursor: pointer; }
 
 /* ── Floating Island Navigation ── */
 
-.nav-island {
+.nav-island,
+.nav-island-left,
+.nav-island-right,
+.nav-group-left,
+.nav-group-right {
 
   display: flex;
 
@@ -260,13 +279,17 @@ button { cursor: pointer; }
 
   padding: 5px 6px;
 
-  background: rgba(255, 253, 250, 0.88);
+  background: rgba(255, 253, 250, 0.92);
 
   border: 1px solid var(--line);
 
   border-radius: 999px;
 
   box-shadow: 0 2px 14px rgba(54, 40, 43, 0.04);
+
+  backdrop-filter: blur(12px);
+
+  flex-shrink: 0;
 
 }
 
@@ -358,7 +381,10 @@ button { cursor: pointer; }
 
 
 
-.mobile-user-drawer { display: none; }
+.mobile-user-drawer,
+.mobile-nav-drawer {
+  display: none;
+}
 
 
 
@@ -6447,6 +6473,16 @@ button { cursor: pointer; }
 
 @media (max-width: 990px) {
 
+  /* Hide desktop topbar navigation islands on tablet/mobile */
+  .topbar-left .nav-island,
+  .topbar-left .nav-island-left,
+  .topbar-left .nav-group-left,
+  .topbar-right .nav-island,
+  .topbar-right .nav-island-right,
+  .topbar-right .nav-group-right {
+    display: none !important;
+  }
+
   .nav-island {
 
     display: none;
@@ -6513,6 +6549,106 @@ button { cursor: pointer; }
 
     place-items: center;
 
+    width: 38px;
+
+    height: 38px;
+
+    border-radius: 12px;
+
+    border: 1px solid var(--line);
+
+    background: var(--card);
+
+    color: var(--ink);
+
+    cursor: pointer;
+
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+
+    transition: all 0.2s ease;
+
+  }
+
+  .mobile-menu-trigger:hover {
+
+    border-color: var(--green);
+
+    color: var(--green);
+
+  }
+
+
+
+  /* ── Mobile Navigation Drawer ── */
+  .mobile-nav-drawer {
+    display: none;
+    position: fixed;
+    top: 78px;
+    left: 0;
+    right: 0;
+    background: rgba(253, 249, 245, 0.98);
+    backdrop-filter: blur(20px);
+    padding: 20px 24px 28px;
+    border-radius: 0 0 24px 24px;
+    border-bottom: 2px solid var(--line);
+    box-shadow: 0 24px 48px rgba(54, 40, 43, 0.16);
+    max-height: calc(100vh - 80px);
+    overflow-y: auto;
+    z-index: 99;
+    flex-direction: column;
+    gap: 16px;
+    box-sizing: border-box;
+    animation: drawerSlideDown 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .mobile-nav-drawer.open {
+    display: flex;
+  }
+
+  @keyframes drawerSlideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .mobile-drawer-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .mobile-drawer-label {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding-left: 6px;
+  }
+
+  .mobile-drawer-links {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 8px;
+    box-shadow: 0 2px 10px rgba(54, 40, 43, 0.03);
+  }
+
+  .mobile-drawer-links .nav-item {
+    padding: 12px 16px;
+    font-size: 13px;
+    border-radius: 12px;
+    justify-content: flex-start;
+    width: 100%;
+    box-sizing: border-box;
   }
 
 
@@ -6675,10 +6811,10 @@ button { cursor: pointer; }
 
 
 
-  .nav-island {
-
+  .nav-island,
+  .mobile-nav-drawer {
     top: 70px;
-
+    max-height: calc(100vh - 70px);
   }
 
 
