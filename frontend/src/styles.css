@@ -10102,3 +10102,196 @@ table {
     grid-template-columns: 1fr;
   }
 }
+
+/* ═════════════════════════════════════════════════════════════════
+   MOBILE BOTTOM NAVIGATION BAR (Dành riêng cho app di động)
+   ═════════════════════════════════════════════════════════════════ */
+
+.mobile-bottom-nav {
+  display: none;
+}
+
+@media (max-width: 990px) {
+  .mobile-bottom-nav {
+    display: flex !important;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: calc(64px + env(safe-area-inset-bottom, 10px));
+    padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 10px));
+    background: rgba(255, 253, 250, 0.94);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--line);
+    box-shadow: 0 -4px 24px rgba(54, 40, 43, 0.08);
+    z-index: 1000;
+    justify-content: space-around;
+    align-items: center;
+    box-sizing: border-box;
+  }
+
+  /* Prevent mobile content from being cut off by bottom bar */
+  .main-content {
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 12px)) !important;
+  }
+
+  .footer {
+    margin-bottom: calc(76px + env(safe-area-inset-bottom, 12px)) !important;
+  }
+
+  .mobile-bottom-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    text-decoration: none;
+    color: var(--muted);
+    padding: 4px 2px;
+    border-radius: 12px;
+    position: relative;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .mobile-bottom-item:active {
+    transform: scale(0.94);
+  }
+
+  .mobile-bottom-icon-badge {
+    width: 32px;
+    height: 32px;
+    display: grid;
+    place-items: center;
+    border-radius: 10px;
+    position: relative;
+    transition: all 0.2s ease;
+  }
+
+  .mobile-bottom-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    transition: color 0.2s ease;
+  }
+
+  /* Elevated Locket FAB in Center */
+  .mobile-bottom-fab {
+    position: relative;
+  }
+
+  .mobile-bottom-fab-badge {
+    width: 46px;
+    height: 46px;
+    border-radius: 15px;
+    margin-top: -14px;
+    background: linear-gradient(135deg, #e76f51 0%, #f4a261 100%);
+    color: #ffffff;
+    display: grid;
+    place-items: center;
+    box-shadow: 0 6px 18px rgba(231, 111, 81, 0.45),
+                inset 0 1.5px 1.5px rgba(255, 255, 255, 0.7),
+                inset 0 -1.5px 3px rgba(0, 0, 0, 0.15);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .mobile-bottom-item-locket.active .mobile-bottom-fab-badge {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 8px 24px rgba(231, 111, 81, 0.6),
+                inset 0 1.5px 1.5px rgba(255, 255, 255, 0.8);
+  }
+
+  .mobile-bottom-item-locket .mobile-bottom-label {
+    color: #e76f51;
+    font-weight: 800;
+  }
+
+  /* Active states for natural pastel sections */
+  .mobile-bottom-item-memories.active .mobile-bottom-icon-badge {
+    background: var(--nature-memories-soft);
+    color: var(--nature-memories);
+    box-shadow: 0 3px 10px rgba(217, 119, 87, 0.22);
+  }
+  .mobile-bottom-item-memories.active .mobile-bottom-label {
+    color: var(--nature-memories);
+    font-weight: 800;
+  }
+
+  .mobile-bottom-item-reflections.active .mobile-bottom-icon-badge {
+    background: var(--nature-reflections-soft);
+    color: var(--nature-reflections);
+    box-shadow: 0 3px 10px rgba(88, 129, 87, 0.22);
+  }
+  .mobile-bottom-item-reflections.active .mobile-bottom-label {
+    color: var(--nature-reflections);
+    font-weight: 800;
+  }
+
+  .mobile-bottom-item-friends.active .mobile-bottom-icon-badge {
+    background: var(--nature-friends-soft);
+    color: var(--nature-friends);
+    box-shadow: 0 3px 10px rgba(214, 91, 123, 0.22);
+  }
+  .mobile-bottom-item-friends.active .mobile-bottom-label {
+    color: var(--nature-friends);
+    font-weight: 800;
+  }
+
+  .mobile-bottom-item-messages.active .mobile-bottom-icon-badge {
+    background: var(--nature-messages-soft);
+    color: var(--nature-messages);
+    box-shadow: 0 3px 10px rgba(123, 104, 166, 0.22);
+  }
+  .mobile-bottom-item-messages.active .mobile-bottom-label {
+    color: var(--nature-messages);
+    font-weight: 800;
+  }
+
+  .mobile-bottom-item-community.active .mobile-bottom-icon-badge {
+    background: var(--nature-community-soft);
+    color: var(--nature-community);
+    box-shadow: 0 3px 10px rgba(217, 130, 43, 0.22);
+  }
+  .mobile-bottom-item-community.active .mobile-bottom-label {
+    color: var(--nature-community);
+    font-weight: 800;
+  }
+
+  .mobile-bottom-item-home.active .mobile-bottom-icon-badge {
+    background: rgba(230, 103, 126, 0.12);
+    color: var(--accent);
+  }
+  .mobile-bottom-item-home.active .mobile-bottom-label {
+    color: var(--accent);
+    font-weight: 800;
+  }
+
+  .mobile-bottom-item-login.active .mobile-bottom-icon-badge {
+    background: rgba(214, 91, 123, 0.14);
+    color: #d65b7b;
+  }
+  .mobile-bottom-item-login.active .mobile-bottom-label {
+    color: #d65b7b;
+    font-weight: 800;
+  }
+
+  /* Messages Badge Count */
+  .mobile-bottom-badge-count {
+    position: absolute;
+    top: -3px;
+    right: -7px;
+    background: #e6677e;
+    color: #ffffff;
+    font-size: 9px;
+    font-weight: 800;
+    border-radius: 999px;
+    padding: 1px 5px;
+    min-width: 15px;
+    text-align: center;
+    border: 1.5px solid #ffffff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    line-height: 1.2;
+  }
+}

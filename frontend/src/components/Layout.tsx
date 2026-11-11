@@ -257,6 +257,76 @@ export default function Layout({ user, setUser, children }: LayoutProps) {
         </div>
         <span>Giữ điều đẹp đẽ • Học từ quá khứ • Cùng xây dựng ngày mai</span>
       </footer>
+
+      {/* ── Mobile Bottom Navigation Bar (Thanh điều hướng phía dưới trên điện thoại) ── */}
+      <nav className="mobile-bottom-nav" aria-label="Điều hướng phía dưới trên điện thoại">
+        {user ? (
+          <>
+            <NavLink to="/memories" className="mobile-bottom-item mobile-bottom-item-memories">
+              <span className="mobile-bottom-icon-badge">
+                <BookHeart size={19} />
+              </span>
+              <span className="mobile-bottom-label">Ký ức</span>
+            </NavLink>
+
+            <NavLink to="/reflections" className="mobile-bottom-item mobile-bottom-item-reflections">
+              <span className="mobile-bottom-icon-badge">
+                <Leaf size={19} />
+              </span>
+              <span className="mobile-bottom-label">Nhìn lại</span>
+            </NavLink>
+
+            <NavLink to="/locket" className="mobile-bottom-item mobile-bottom-item-locket mobile-bottom-fab" title="Locket - Khoảnh khắc trực tiếp">
+              <span className="mobile-bottom-fab-badge">
+                <Camera size={22} />
+              </span>
+              <span className="mobile-bottom-label">Locket</span>
+            </NavLink>
+
+            <NavLink to="/friends" className="mobile-bottom-item mobile-bottom-item-friends">
+              <span className="mobile-bottom-icon-badge">
+                <Users size={19} />
+              </span>
+              <span className="mobile-bottom-label">Bạn bè</span>
+            </NavLink>
+
+            <NavLink to="/messages" className="mobile-bottom-item mobile-bottom-item-messages">
+              <span className="mobile-bottom-icon-badge">
+                <MessageSquare size={19} />
+                {unreadCount > 0 && (
+                  <span className="mobile-bottom-badge-count">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
+              </span>
+              <span className="mobile-bottom-label">Tin nhắn</span>
+            </NavLink>
+          </>
+        ) : (
+          <>
+            <NavLink to="/" className="mobile-bottom-item mobile-bottom-item-home">
+              <span className="mobile-bottom-icon-badge">
+                <Sunrise size={19} />
+              </span>
+              <span className="mobile-bottom-label">Trang chủ</span>
+            </NavLink>
+
+            <NavLink to="/community" className="mobile-bottom-item mobile-bottom-item-community">
+              <span className="mobile-bottom-icon-badge">
+                <Sparkles size={19} />
+              </span>
+              <span className="mobile-bottom-label">Cộng đồng</span>
+            </NavLink>
+
+            <NavLink to="/login" className="mobile-bottom-item mobile-bottom-item-login">
+              <span className="mobile-bottom-icon-badge">
+                <LogIn size={19} />
+              </span>
+              <span className="mobile-bottom-label">Đăng nhập</span>
+            </NavLink>
+          </>
+        )}
+      </nav>
     </div>
   )
 }
