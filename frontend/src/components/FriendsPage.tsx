@@ -260,7 +260,7 @@ export default function FriendsPage() {
 
         <div className="friend-info">
           <h3>{user.display_name}</h3>
-          <p>{user.bio?.trim() || 'Thành viên New Beginning'}</p>
+          {user.bio?.trim() ? <p>{user.bio.trim()}</p> : null}
         </div>
 
         {action}
@@ -292,51 +292,23 @@ export default function FriendsPage() {
 
       <div className="friends-page">
 
-        {/* HERO */}
+        {/* HERO / HEADER */}
         <section className="friends-hero">
           <div>
             <span className="friends-eyebrow">
-              <Sparkles size={14} />
+              <Sparkles size={13} />
               KẾT NỐI VÀ CHIA SẺ
             </span>
 
             <h1>Bạn bè</h1>
 
             <p>
-              Những người bạn đồng hành cùng bạn trên hành trình
-              lưu giữ những điều đẹp đẽ.
+              Đồng hành và chia sẻ cùng bạn bè.
             </p>
           </div>
 
           <div className="friends-hero-icon">
-            <Users size={42} />
-          </div>
-        </section>
-
-        {/* STATISTICS */}
-        <section className="friends-stats">
-          <div className="friends-stat-card">
-            <Users size={21} />
-            <div>
-              <strong>{friends.length}</strong>
-              <span>Bạn bè</span>
-            </div>
-          </div>
-
-          <div className="friends-stat-card">
-            <UserPlus size={21} />
-            <div>
-              <strong>{requests.length}</strong>
-              <span>Lời mời nhận được</span>
-            </div>
-          </div>
-
-          <div className="friends-stat-card">
-            <UserCheck size={21} />
-            <div>
-              <strong>{sentRequests.length}</strong>
-              <span>Đã gửi</span>
-            </div>
+            <Users size={22} />
           </div>
         </section>
 
@@ -346,11 +318,11 @@ export default function FriendsPage() {
           {/* TOOLBAR */}
           <div className="friends-toolbar">
             <div className="friends-search">
-              <Search size={18} />
+              <Search size={16} />
 
               <input
                 type="text"
-                placeholder="Tìm kiếm theo tên hoặc email..."
+                placeholder="Tìm bạn bè theo tên..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
               />
@@ -362,7 +334,7 @@ export default function FriendsPage() {
               disabled={loading}
               title="Tải lại dữ liệu"
             >
-              <RefreshCw size={16} />
+              <RefreshCw size={14} />
               Làm mới
             </button>
           </div>
@@ -435,13 +407,13 @@ export default function FriendsPage() {
                             navigate(`/messages?user=${friend.id}`)
                           }
                         >
-                          <MessageCircle size={17} />
+                          <MessageCircle size={15} />
                         </button>
                       )
                     )
                   ) : (
                     renderEmpty(
-                      <UserRound size={35} />,
+                      <UserRound size={28} />,
                       friends.length === 0
                         ? 'Bạn chưa có người bạn nào'
                         : 'Không tìm thấy bạn bè',
@@ -463,10 +435,10 @@ export default function FriendsPage() {
 
                         <div className="friend-info">
                           <h3>{request.sender.display_name}</h3>
-                          <p>{request.sender.bio?.trim() || 'Thành viên New Beginning'}</p>
+                          {request.sender.bio?.trim() ? <p>{request.sender.bio.trim()}</p> : null}
                           <span>
                             <Clock size={11} />
-                            {' '}Đã gửi lời mời kết bạn
+                            {' '}Đã gửi lời mời
                           </span>
                         </div>
 
@@ -477,7 +449,7 @@ export default function FriendsPage() {
                             disabled={busyAction !== null}
                             onClick={() => acceptRequest(request.id)}
                           >
-                            <Check size={17} />
+                            <Check size={15} />
                           </button>
 
                           <button
@@ -486,14 +458,14 @@ export default function FriendsPage() {
                             disabled={busyAction !== null}
                             onClick={() => rejectRequest(request.id)}
                           >
-                            <X size={17} />
+                            <X size={15} />
                           </button>
                         </div>
                       </div>
                     ))
                   ) : (
                     renderEmpty(
-                      <UserCheck size={35} />,
+                      <UserCheck size={28} />,
                       'Chưa có lời mời kết bạn',
                       'Khi có người gửi lời mời, bạn sẽ thấy ở đây.'
                     )
@@ -517,7 +489,7 @@ export default function FriendsPage() {
                             'Đang gửi...'
                           ) : (
                             <>
-                              <UserPlus size={15} />
+                              <UserPlus size={14} />
                               Kết bạn
                             </>
                           )}
@@ -526,7 +498,7 @@ export default function FriendsPage() {
                     )
                   ) : (
                     renderEmpty(
-                      <Sparkles size={35} />,
+                      <Sparkles size={28} />,
                       'Không có gợi ý phù hợp',
                       'Có thể bạn đã kết nối với các thành viên phù hợp hoặc chưa có tài khoản khác.'
                     )
@@ -546,7 +518,7 @@ export default function FriendsPage() {
 
                         <div className="friend-info">
                           <h3>{request.receiver.display_name}</h3>
-                          <p>{request.receiver.bio?.trim() || 'Thành viên New Beginning'}</p>
+                          {request.receiver.bio?.trim() ? <p>{request.receiver.bio.trim()}</p> : null}
                           <span>Đang chờ phản hồi</span>
                         </div>
 
@@ -556,13 +528,13 @@ export default function FriendsPage() {
                           disabled={busyAction !== null}
                           onClick={() => cancelRequest(request.id)}
                         >
-                          <X size={17} />
+                          <X size={15} />
                         </button>
                       </div>
                     ))
                   ) : (
                     renderEmpty(
-                      <Clock size={35} />,
+                      <Clock size={28} />,
                       'Bạn chưa gửi lời mời nào',
                       'Những lời mời đang chờ phản hồi sẽ xuất hiện ở đây.'
                     )
