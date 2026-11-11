@@ -1,11 +1,12 @@
-import { useState, useEffect, ReactNode } from 'react'
-import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { useState, useEffect, useRef, ReactNode } from 'react'
+import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import {
   LogIn, LogOut, Menu,
   User as UserIcon, MessageSquare, X,
   BookHeart, Leaf, Target, Users, Sparkles, Camera
 } from 'lucide-react'
-import { fetchUnreadCount, setToken, User } from '../api'
+import { fetchConversations, fetchUnreadCount, setToken, User } from '../api'
+import { triggerMessageNotification } from '../utils/notifications'
 
 interface LayoutProps {
   user: User | null
@@ -22,6 +23,15 @@ export default function Layout({ user, setUser, children }: LayoutProps) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [unreadCount, setUnreadCount] = useState(0)
   const navigate = useNavigate()
+  const location = useLocation()
+  const locationRef = useRef(location)
+  const lastKnownMessageIds = useRef<Record<number, number>>({})
+  const isInitialPoll = useRef(true)
+  const isMessagesPage = location.pathname.startsWith('/messages')
+
+  useEffect(() => {
+    locationRef.current = location
+  }, [location])
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', 'light')
@@ -31,21 +41,77 @@ export default function Layout({ user, setUser, children }: LayoutProps) {
   useEffect(() => {
     if (!user) {
       setUnreadCount(0)
+      lastKnownMessageIds.current = {}
+      isInitialPoll.current = true
       return
     }
 
-    const checkUnread = async () => {
+    const checkMessages = async () => {
       try {
-        const res = await fetchUnreadCount()
-        setUnreadCount(res.unread_count || 0)
+        const convs = await fetchConversations()
+        let totalUnread = 0
+
+        for (const conv of convs) {
+          totalUnread += conv.unread_count || 0
+          const lastMsg = conv.last_message
+          if (!lastMsg) continue
+
+          const friendId = conv.friend.id
+          const prevId = lastKnownMessageIds.current[friendId]
+
+          // Nhận diện tin nhắn mới trong hội thoại này
+          if (prevId === undefined || lastMsg.id > prevId) {
+            lastKnownMessageIds.current[friendId] = lastMsg.id
+
+            // Nếu không phải lần tải đầu và tin nhắn do người khác gửi tới (incoming message)
+            if (!isInitialPoll.current && lastMsg.sender_id === friendId) {
+              const currentLoc = locationRef.current
+              const isCurrentlyChatting =
+                currentLoc.pathname === '/messages' &&
+                new URLSearchParams(currentLoc.search).get('user') === String(friendId) &&
+                document.visibilityState === 'visible'
+
+              // Nếu không phải đang mở xem trực tiếp cuộc trò chuyện trên màn hình, phát chuông & thông báo đẩy
+              if (!isCurrentlyChatting) {
+                triggerMessageNotification({
+                  title: `Tin nhắn mới từ ${conv.friend.display_name}`,
+                  body: lastMsg.content || 'Bạn có một tin nhắn mới',
+                  icon: conv.friend.avatar_url || '/pwa-192x192.png',
+                  url: `/messages?user=${friendId}`,
+                  tag: `chat-${friendId}`,
+                })
+              }
+            }
+          }
+        }
+
+        setUnreadCount(totalUnread)
+        isInitialPoll.current = false
       } catch {
-        // ignore
+        // Dự phòng: cập nhật unread count nếu fetchConversations gặp trục trặc
+        try {
+          const res = await fetchUnreadCount()
+          setUnreadCount(res.unread_count || 0)
+        } catch {
+          // ignore
+        }
       }
     }
 
-    checkUnread()
-    const interval = setInterval(checkUnread, 15000)
-    return () => clearInterval(interval)
+    checkMessages()
+    // Background polling mỗi 5 giây cho tin nhắn và thông báo thời gian thực
+    const interval = setInterval(checkMessages, 5000)
+
+    // Lắng nghe sự kiện cập nhật tin nhắn khi người dùng đọc hoặc gửi tin ở MessagesPage
+    const handleMessagesUpdated = () => {
+      checkMessages()
+    }
+    window.addEventListener('nb_messages_updated', handleMessagesUpdated)
+
+    return () => {
+      clearInterval(interval)
+      window.removeEventListener('nb_messages_updated', handleMessagesUpdated)
+    }
   }, [user])
 
   function signOut() {
@@ -65,8 +131,8 @@ export default function Layout({ user, setUser, children }: LayoutProps) {
                 <img src="/trongdao.png.png" alt="Logo" className="brand-logo-img" />
               </span>
               <div className="brand-text">
-                <span className="brand-title">NHẬT KÝ</span>
-                <span className="brand-badge">NEW BEGINNING</span>
+                <span className="brand-title">NHẬT KÝ CỦA TÔI</span>
+                <span className="brand-badge">GIỮ ĐIỀU ĐẸP ĐẼ • HỌC TỪ QUÁ KHỨ • CÙNG XÂY DỰNG NGÀY MAI</span>
               </div>
             </Link>
 
@@ -257,6 +323,21 @@ export default function Layout({ user, setUser, children }: LayoutProps) {
         </div>
         <span>Giữ điều đẹp đẽ • Học từ quá khứ • Cùng xây dựng ngày mai</span>
       </footer>
+
+      {/* ── Khối thương hiệu cố định trên thiết bị di động (nằm ngay trên thanh điều hướng dưới) ── */}
+      {!isMessagesPage && (
+        <div className="mobile-fixed-branding" aria-hidden="true">
+          <div className="mobile-fixed-branding-inner">
+            <span className="mobile-fixed-brand-mark">
+              <img src="/trongdao.png.png" alt="" className="mobile-fixed-brand-img" />
+            </span>
+            <div className="mobile-fixed-brand-text">
+              <span className="mobile-fixed-brand-title">NHẬT KÝ CỦA TÔI</span>
+              <span className="mobile-fixed-brand-slogan">GIỮ ĐIỀU ĐẸP ĐẼ • HỌC TỪ QUÁ KHỨ • CÙNG XÂY DỰNG NGÀY MAI</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Mobile Bottom Navigation Bar (Thanh điều hướng phía dưới trên điện thoại) ── */}
       <nav className="mobile-bottom-nav" aria-label="Điều hướng phía dưới trên điện thoại">
