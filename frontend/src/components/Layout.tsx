@@ -27,7 +27,6 @@ export default function Layout({ user, setUser, children }: LayoutProps) {
   const locationRef = useRef(location)
   const lastKnownMessageIds = useRef<Record<number, number>>({})
   const isInitialPoll = useRef(true)
-  const isMessagesPage = location.pathname.startsWith('/messages')
 
   useEffect(() => {
     locationRef.current = location
@@ -132,7 +131,7 @@ export default function Layout({ user, setUser, children }: LayoutProps) {
               </span>
               <div className="brand-text">
                 <span className="brand-title">NHẬT KÝ CỦA TÔI</span>
-                <span className="brand-badge">GIỮ ĐIỀU ĐẸP ĐẼ • HỌC TỪ QUÁ KHỨ • CÙNG XÂY DỰNG NGÀY MAI</span>
+                <span className="brand-badge">NEW BEGINNING</span>
               </div>
             </Link>
 
@@ -323,21 +322,6 @@ export default function Layout({ user, setUser, children }: LayoutProps) {
         </div>
         <span>Giữ điều đẹp đẽ • Học từ quá khứ • Cùng xây dựng ngày mai</span>
       </footer>
-
-      {/* ── Khối thương hiệu cố định trên thiết bị di động (nằm ngay trên thanh điều hướng dưới) ── */}
-      {!isMessagesPage && (
-        <div className="mobile-fixed-branding" aria-hidden="true">
-          <div className="mobile-fixed-branding-inner">
-            <span className="mobile-fixed-brand-mark">
-              <img src="/trongdao.png.png" alt="" className="mobile-fixed-brand-img" />
-            </span>
-            <div className="mobile-fixed-brand-text">
-              <span className="mobile-fixed-brand-title">NHẬT KÝ CỦA TÔI</span>
-              <span className="mobile-fixed-brand-slogan">GIỮ ĐIỀU ĐẸP ĐẼ • HỌC TỪ QUÁ KHỨ • CÙNG XÂY DỰNG NGÀY MAI</span>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* ── Mobile Bottom Navigation Bar (Thanh điều hướng phía dưới trên điện thoại) ── */}
       <nav className="mobile-bottom-nav" aria-label="Điều hướng phía dưới trên điện thoại">
