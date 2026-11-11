@@ -71,18 +71,22 @@ export default function Layout({ user, setUser, children }: LayoutProps) {
             </Link>
 
             <nav className="nav-island nav-island-left nav-group-left">
-              <NavLink to="/memories" className="nav-item nav-item-memories">
-                <span className="nav-icon-badge"><BookHeart size={15} /></span>
-                <span>Ký ức</span>
-              </NavLink>
-              <NavLink to="/reflections" className="nav-item nav-item-reflections">
-                <span className="nav-icon-badge"><Leaf size={15} /></span>
-                <span>Nhìn lại</span>
-              </NavLink>
-              <NavLink to="/goals" className="nav-item nav-item-goals">
-                <span className="nav-icon-badge"><Target size={15} /></span>
-                <span>Ngày mai</span>
-              </NavLink>
+              {user && (
+                <>
+                  <NavLink to="/memories" className="nav-item nav-item-memories">
+                    <span className="nav-icon-badge"><BookHeart size={15} /></span>
+                    <span>Ký ức</span>
+                  </NavLink>
+                  <NavLink to="/reflections" className="nav-item nav-item-reflections">
+                    <span className="nav-icon-badge"><Leaf size={15} /></span>
+                    <span>Nhìn lại</span>
+                  </NavLink>
+                  <NavLink to="/goals" className="nav-item nav-item-goals">
+                    <span className="nav-icon-badge"><Target size={15} /></span>
+                    <span>Ngày mai</span>
+                  </NavLink>
+                </>
+              )}
               <NavLink to="/community" className="nav-item nav-item-community">
                 <span className="nav-icon-badge"><Sparkles size={15} /></span>
                 <span>Cộng đồng</span>
@@ -92,25 +96,27 @@ export default function Layout({ user, setUser, children }: LayoutProps) {
 
           {/* ── Right Zone (Bên tay phải): Social Nav + Actions ── */}
           <div className="topbar-right" style={{ display: 'flex', alignItems: 'center', gap: 'clamp(10px, 1.5vw, 18px)' }}>
-            <nav className="nav-island nav-island-right nav-group-right">
-              <NavLink to="/locket" className="nav-item nav-item-locket">
-                <span className="nav-icon-badge"><Camera size={15} /></span>
-                <span>Locket</span>
-              </NavLink>
-              <NavLink to="/friends" className="nav-item nav-item-friends">
-                <span className="nav-icon-badge"><Users size={15} /></span>
-                <span>Bạn bè</span>
-              </NavLink>
-              <NavLink to="/messages" className="nav-item nav-item-messages nav-msg">
-                <span className="nav-icon-badge"><MessageSquare size={15} /></span>
-                <span>Tin nhắn</span>
-                {user && unreadCount > 0 && (
-                  <span className="nav-badge-count">
-                    {unreadCount > 99 ? '99+' : unreadCount}
-                  </span>
-                )}
-              </NavLink>
-            </nav>
+            {user && (
+              <nav className="nav-island nav-island-right nav-group-right">
+                <NavLink to="/locket" className="nav-item nav-item-locket">
+                  <span className="nav-icon-badge"><Camera size={15} /></span>
+                  <span>Locket</span>
+                </NavLink>
+                <NavLink to="/friends" className="nav-item nav-item-friends">
+                  <span className="nav-icon-badge"><Users size={15} /></span>
+                  <span>Bạn bè</span>
+                </NavLink>
+                <NavLink to="/messages" className="nav-item nav-item-messages nav-msg">
+                  <span className="nav-icon-badge"><MessageSquare size={15} /></span>
+                  <span>Tin nhắn</span>
+                  {unreadCount > 0 && (
+                    <span className="nav-badge-count">
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </span>
+                  )}
+                </NavLink>
+              </nav>
+            )}
 
             <div className="topbar-actions">
               {user ? (
@@ -154,50 +160,64 @@ export default function Layout({ user, setUser, children }: LayoutProps) {
 
         {/* ── Mobile Navigation Drawer ── */}
         <div className={`mobile-nav-drawer ${mobileOpen ? 'open' : ''}`}>
-          <div className="mobile-drawer-section">
-            <span className="mobile-drawer-label">Nhật ký & Khám phá</span>
-            <div className="mobile-drawer-links">
-              <NavLink to="/memories" className="nav-item nav-item-memories" onClick={() => setMobileOpen(false)}>
-                <span className="nav-icon-badge"><BookHeart size={16} /></span>
-                <span>Ký ức</span>
-              </NavLink>
-              <NavLink to="/reflections" className="nav-item nav-item-reflections" onClick={() => setMobileOpen(false)}>
-                <span className="nav-icon-badge"><Leaf size={16} /></span>
-                <span>Nhìn lại</span>
-              </NavLink>
-              <NavLink to="/goals" className="nav-item nav-item-goals" onClick={() => setMobileOpen(false)}>
-                <span className="nav-icon-badge"><Target size={16} /></span>
-                <span>Ngày mai</span>
-              </NavLink>
-              <NavLink to="/community" className="nav-item nav-item-community" onClick={() => setMobileOpen(false)}>
-                <span className="nav-icon-badge"><Sparkles size={16} /></span>
-                <span>Cộng đồng</span>
-              </NavLink>
-            </div>
-          </div>
+          {user ? (
+            <>
+              <div className="mobile-drawer-section">
+                <span className="mobile-drawer-label">Nhật ký & Khám phá</span>
+                <div className="mobile-drawer-links">
+                  <NavLink to="/memories" className="nav-item nav-item-memories" onClick={() => setMobileOpen(false)}>
+                    <span className="nav-icon-badge"><BookHeart size={16} /></span>
+                    <span>Ký ức</span>
+                  </NavLink>
+                  <NavLink to="/reflections" className="nav-item nav-item-reflections" onClick={() => setMobileOpen(false)}>
+                    <span className="nav-icon-badge"><Leaf size={16} /></span>
+                    <span>Nhìn lại</span>
+                  </NavLink>
+                  <NavLink to="/goals" className="nav-item nav-item-goals" onClick={() => setMobileOpen(false)}>
+                    <span className="nav-icon-badge"><Target size={16} /></span>
+                    <span>Ngày mai</span>
+                  </NavLink>
+                  <NavLink to="/community" className="nav-item nav-item-community" onClick={() => setMobileOpen(false)}>
+                    <span className="nav-icon-badge"><Sparkles size={16} /></span>
+                    <span>Cộng đồng</span>
+                  </NavLink>
+                </div>
+              </div>
 
-          <div className="mobile-drawer-section">
-            <span className="mobile-drawer-label">Kết nối & Xã hội</span>
-            <div className="mobile-drawer-links">
-              <NavLink to="/locket" className="nav-item nav-item-locket" onClick={() => setMobileOpen(false)}>
-                <span className="nav-icon-badge"><Camera size={16} /></span>
-                <span>Locket</span>
-              </NavLink>
-              <NavLink to="/friends" className="nav-item nav-item-friends" onClick={() => setMobileOpen(false)}>
-                <span className="nav-icon-badge"><Users size={16} /></span>
-                <span>Bạn bè</span>
-              </NavLink>
-              <NavLink to="/messages" className="nav-item nav-item-messages nav-msg" onClick={() => setMobileOpen(false)}>
-                <span className="nav-icon-badge"><MessageSquare size={16} /></span>
-                <span>Tin nhắn</span>
-                {user && unreadCount > 0 && (
-                  <span className="nav-badge-count">
-                    {unreadCount > 99 ? '99+' : unreadCount}
-                  </span>
-                )}
-              </NavLink>
+              <div className="mobile-drawer-section">
+                <span className="mobile-drawer-label">Kết nối & Xã hội</span>
+                <div className="mobile-drawer-links">
+                  <NavLink to="/locket" className="nav-item nav-item-locket" onClick={() => setMobileOpen(false)}>
+                    <span className="nav-icon-badge"><Camera size={16} /></span>
+                    <span>Locket</span>
+                  </NavLink>
+                  <NavLink to="/friends" className="nav-item nav-item-friends" onClick={() => setMobileOpen(false)}>
+                    <span className="nav-icon-badge"><Users size={16} /></span>
+                    <span>Bạn bè</span>
+                  </NavLink>
+                  <NavLink to="/messages" className="nav-item nav-item-messages nav-msg" onClick={() => setMobileOpen(false)}>
+                    <span className="nav-icon-badge"><MessageSquare size={16} /></span>
+                    <span>Tin nhắn</span>
+                    {unreadCount > 0 && (
+                      <span className="nav-badge-count">
+                        {unreadCount > 99 ? '99+' : unreadCount}
+                      </span>
+                    )}
+                  </NavLink>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="mobile-drawer-section">
+              <span className="mobile-drawer-label">Khám phá</span>
+              <div className="mobile-drawer-links">
+                <NavLink to="/community" className="nav-item nav-item-community" onClick={() => setMobileOpen(false)}>
+                  <span className="nav-icon-badge"><Sparkles size={16} /></span>
+                  <span>Cộng đồng</span>
+                </NavLink>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Mobile-only profile & logout inside drawer */}
           <div className="mobile-user-drawer">
