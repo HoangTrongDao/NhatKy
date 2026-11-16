@@ -1,11 +1,15 @@
 import { useState, useEffect, useRef, FormEvent, ChangeEvent } from 'react'
+import { useParams, Link } from 'react-router-dom'
 import {
   User as UserIcon, KeyRound, Save, Camera, Eye, EyeOff,
   ShieldCheck, Sparkles, Check, ChevronDown, ChevronUp,
   Image as ImageIcon, Trash2, Calendar,
-  X, RotateCcw, Lock, Edit3
+  X, RotateCcw, Lock, Edit3, ArrowLeft, MessageCircle
 } from 'lucide-react'
-import { User, updateProfile, changePassword, fetchDashboardStats, DashboardStats } from '../api'
+import {
+  User, updateProfile, changePassword, fetchDashboardStats,
+  DashboardStats, fetchUserPublicProfile
+} from '../api'
 import { useToast } from './Toast'
 import RequireUser from './RequireUser'
 import PageHeader from './PageHeader'
@@ -43,7 +47,25 @@ function formatDate(isoStr?: string): string {
   }
 }
 
-export default function ProfilePage({ user, onUserUpdate }: { user: User | null; onUserUpdate: (u: User) => void }) {
+export default function ProfilePage({
+  user,
+  onUserUpdate,
+  userId: propUserId,
+}: {
+  user: User | null
+  onUserUpdate?: (u: User) => void
+  userId?: string | number
+}) {
+  const params = useParams<{ userId?: string }>()
+  const targetUserId = propUserId ? String(propUserId) : params.userId
+  const isOwnProfile = !targetUserId || (user && String(user.id) === String(targetUserId))
+
+  // State for public user profile (when viewing another user's profile)
+  const [publicUser, setPublicUser] = useState<{ id?: number; display_name: string; bio: string; avatar_url?: string; created_at: string } | null>(null)
+  const [loadingPublic, setLoadingPublic] = useState(false)
+  const [publicError, setPublicError] = useState('')
+
+  // Own profile form states
   const [displayName, setDisplayName] = useState(user?.display_name || '')
   const [bio, setBio] = useState(user?.bio || '')
   const [avatarUrl, setAvatarUrl] = useState(user?.avatar_url || '')
@@ -76,8 +98,27 @@ export default function ProfilePage({ user, onUserUpdate }: { user: User | null;
                   bio !== (user?.bio || '') ||
                   avatarUrl !== (user?.avatar_url || '')
 
+  // Fetch public user if not own profile
   useEffect(() => {
-    if (user) {
+    if (!isOwnProfile && targetUserId) {
+      setLoadingPublic(true)
+      setPublicError('')
+      fetchUserPublicProfile(Number(targetUserId))
+        .then(data => {
+          setPublicUser(data)
+        })
+        .catch(err => {
+          setPublicError(err.message || 'Không thể tìm thấy thông tin bạn bè.')
+        })
+        .finally(() => {
+          setLoadingPublic(false)
+        })
+    }
+  }, [isOwnProfile, targetUserId])
+
+  // Sync own user profile
+  useEffect(() => {
+    if (user && isOwnProfile) {
       setDisplayName(user.display_name || '')
       setBio(user.bio || '')
       setAvatarUrl(user.avatar_url || '')
@@ -85,7 +126,7 @@ export default function ProfilePage({ user, onUserUpdate }: { user: User | null;
         .then(setStats)
         .catch(() => {})
     }
-  }, [user])
+  }, [user, isOwnProfile])
 
   function handleReset() {
     if (user) {
@@ -153,7 +194,7 @@ export default function ProfilePage({ user, onUserUpdate }: { user: User | null;
         bio: bio.trim(),
         avatar_url: avatarUrl
       })
-      onUserUpdate(updated)
+      if (onUserUpdate) onUserUpdate(updated)
       addToast('Không gian cá nhân đã được lưu thành công!', 'success')
     } catch (err) {
       addToast(err instanceof Error ? err.message : 'Không cập nhật được hồ sơ.', 'error')
@@ -192,66 +233,142 @@ export default function ProfilePage({ user, onUserUpdate }: { user: User | null;
     <RequireUser user={user}>
       <div className="page subpage profile-page-container">
         <PageHeader
-          eyebrow="KHÔNG GIAN RIÊNG TƯ"
-          title="Không gian riêng tư của bạn."
-          description="Nơi bình yên để thể hiện bản sắc, chăm sóc tâm hồn và quản lý danh tính của riêng bạn."
+          eyebrow={isOwnProfile ? "KHÔNG GIAN RIÊNG TƯ" : "KHÔNG GIAN BẠN BÈ"}
+          title={isOwnProfile ? "Không gian riêng tư của bạn." : `Hồ sơ của ${publicUser?.display_name || 'Bạn bè'}`}
+          description={isOwnProfile
+            ? "Nơi bình yên để thể hiện bản sắc, chăm sóc tâm hồn và quản lý danh tính của riêng bạn."
+            : "Khám phá không gian chia sẻ và những điều bình dị từ một tâm hồn đồng điệu."}
           icon={<UserIcon size={26} />}
         />
 
-        <div className="profile-dashboard-layout">
-          {/* ══════════════════════════════════════════════════════
-              CỘT TRÁI: THẺ DANH TÍNH CÁ NHÂN & CỘT MỐC ĐỒNG HÀNH
-              ══════════════════════════════════════════════════════ */}
-          <aside className="profile-identity-card">
-            {/* Banner nghệ thuật ấm áp */}
-            <div className="profile-cover-banner">
-              <span className="cover-badge">
-                <Sparkles size={13} /> Thành viên New Beginning
-              </span>
-            </div>
+        {/* ══════════════════════════════════════════════════════
+            TRƯỜNG HỢP 1: XEM HỒ SƠ CÔNG KHAI CỦA BẠN BÈ (/profile/:userId)
+            ══════════════════════════════════════════════════════ */}
+        {!isOwnProfile ? (
+          <div className="profile-public-view">
+            {loadingPublic ? (
+              <div className="profile-hero-banner" style={{ padding: '60px 20px', background: 'var(--card)' }}>
+                <p style={{ color: 'var(--muted)', fontSize: '15px' }}>Đang mở nhật ký bạn bè... 🌸</p>
+              </div>
+            ) : publicError ? (
+              <div className="profile-hero-banner" style={{ padding: '40px 20px', background: 'var(--card)' }}>
+                <h2 style={{ fontFamily: 'var(--serif)', marginBottom: '8px' }}>Chưa tìm thấy người bạn này</h2>
+                <p style={{ color: 'var(--muted)', marginBottom: '16px' }}>{publicError}</p>
+                <Link to="/friends" className="button secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <ArrowLeft size={16} /> Quay lại danh sách Bạn bè
+                </Link>
+              </div>
+            ) : publicUser ? (
+              <div>
+                <div
+                  className="profile-hero-banner"
+                  style={{
+                    background: publicUser.avatar_url?.startsWith('#')
+                      ? `linear-gradient(135deg, ${publicUser.avatar_url}22, var(--butter-200))`
+                      : 'linear-gradient(135deg, var(--butter-200) 0%, var(--pink-soft) 50%, var(--peach) 100%)'
+                  }}
+                >
+                  <div className="profile-mood-badge">
+                    <span>🌿</span>
+                    <span>Bạn đồng hành</span>
+                  </div>
+                  <div className="profile-hero-avatar" style={{ cursor: 'default' }}>
+                    {publicUser.avatar_url ? (
+                      <img src={publicUser.avatar_url} alt="Avatar" className="avatar-img-circle" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                      <span>{publicUser.display_name ? publicUser.display_name.charAt(0).toUpperCase() : 'U'}</span>
+                    )}
+                  </div>
+                  <h1 className="profile-hero-name">{publicUser.display_name || 'Người bạn bí ẩn'}</h1>
+                  <p className="profile-hero-bio">"{publicUser.bio || 'Chào bạn, chúc bạn một ngày an yên 🌱'}"</p>
+                  <span className="profile-join-date">
+                    <Calendar size={13} /> Thành viên từ {formatDate(publicUser.created_at)}
+                  </span>
+                </div>
 
-            {/* Khung avatar trung tâm với nút đổi ảnh */}
-            <div className="profile-avatar-center-wrap">
+                <div className="profile-ornament-divider">〜 ✦ 〜</div>
+
+                <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '20px' }}>
+                  <Link to={`/messages?userId=${targetUserId}`} className="button primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <MessageCircle size={16} /> Nhắn tin trò chuyện
+                  </Link>
+                  <Link to="/friends" className="button secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <ArrowLeft size={16} /> Danh sách bạn bè
+                  </Link>
+                </div>
+              </div>
+            ) : null}
+          </div>
+        ) : (
+          /* ══════════════════════════════════════════════════════
+              TRƯỜNG HỢP 2: HỒ SƠ CÁ NHÂN CỦA CHÍNH MÌNH (/profile)
+              ══════════════════════════════════════════════════════ */
+          <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+            {/* 1. HERO BANNER BÌNH YÊN */}
+            <div
+              className="profile-hero-banner"
+              style={{
+                background: avatarUrl?.startsWith('#')
+                  ? `linear-gradient(135deg, ${avatarUrl}22, var(--butter-200))`
+                  : 'linear-gradient(135deg, var(--butter-200) 0%, var(--pink-soft) 50%, var(--peach) 100%)'
+              }}
+            >
+              <div className="profile-mood-badge">
+                <span>{stats && stats.total_memories > 5 ? '🌿' : '🌸'}</span>
+                <span>{stats && stats.total_memories > 5 ? 'Tâm hồn phong phú' : 'Đang viết nhật ký 🌱'}</span>
+              </div>
+
               <div
-                className="profile-avatar-circle"
+                className="profile-hero-avatar"
                 onClick={() => setShowAvatarPicker(true)}
                 title="Nhấn để đổi ảnh đại diện"
               >
                 {avatarUrl ? (
-                  <img src={avatarUrl} alt="Avatar" className="avatar-img-circle" />
+                  <img src={avatarUrl} alt="Avatar" className="avatar-img-circle" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 ) : (
-                  <div className="avatar-initials">
-                    {displayName ? displayName.charAt(0).toUpperCase() : 'U'}
-                  </div>
+                  <span>{displayName ? displayName.charAt(0).toUpperCase() : 'U'}</span>
                 )}
-                <div className="avatar-hover-overlay">
-                  <Camera size={20} />
-                  <span>Đổi ảnh</span>
+                <div className="profile-avatar-overlay">
+                  <Camera size={18} />
                 </div>
               </div>
 
-              <button
-                type="button"
-                className="btn-trigger-picker"
-                onClick={() => setShowAvatarPicker(true)}
-              >
-                <Camera size={14} />
-                <span>Đổi ảnh đại diện</span>
-              </button>
+              <h1 className="profile-hero-name">{displayName || 'Bạn ơi'}</h1>
+              <p className="profile-hero-bio">"{bio || 'Viết nhật ký mỗi ngày 🌱'}"</p>
+              <span className="profile-join-date">
+                <Calendar size={13} /> Thành viên từ {formatDate(user?.created_at)}
+              </span>
             </div>
 
-            {/* Thông tin tên & tiểu sử tóm tắt */}
-            <div className="identity-text-meta">
-              <h2 className="identity-name">{displayName || 'Chưa đặt tên'}</h2>
-              {bio ? (
-                <p className="identity-bio">"{bio}"</p>
-              ) : (
-                <p className="identity-bio-empty">Chưa có lời tự nhủ hay châm ngôn sống...</p>
-              )}
+            {/* 2. STATS ROW DẠNG PILL BADGES */}
+            <div className="profile-stats-row">
+              <div className="profile-stat-pill">
+                <span>📖</span>
+                <strong>{stats?.total_memories ?? 0}</strong>
+                <small>Ký ức</small>
+              </div>
+              <div className="profile-stat-pill">
+                <span>🌿</span>
+                <strong>{stats?.total_reflections ?? 0}</strong>
+                <small>Suy tư</small>
+              </div>
+              <div className="profile-stat-pill">
+                <span>🎯</span>
+                <strong>{stats?.total_goals ?? 0}</strong>
+                <small>Mục tiêu</small>
+              </div>
+              <div className="profile-stat-pill">
+                <span>✨</span>
+                <strong>{stats?.days_since_joined ?? 1}</strong>
+                <small>Ngày gắn bó</small>
+              </div>
             </div>
 
-            {/* Thẻ Gmail được ẩn & bảo mật an toàn */}
-            <div className="identity-private-email-box">
+            {/* 3. ĐƯỜNG KẺ HOA VĂN TRANG TRÍ */}
+            <div className="profile-ornament-divider">〜 ✦ 〜</div>
+
+            {/* 4. GMAIL BẢO MẬT */}
+            <div className="identity-private-email-box" style={{ margin: '0 auto 20px' }}>
               <div className="email-box-header">
                 <div className="email-box-title">
                   <ShieldCheck size={16} className="shield-icon" />
@@ -273,153 +390,115 @@ export default function ProfilePage({ user, onUserUpdate }: { user: User | null;
               </div>
 
               <p className="email-box-notice">
-                🔒 Địa chỉ này được ẩn bảo mật, không bao giờ hiển thị công khai.
+                🔒 Địa chỉ này được ẩn bảo mật, không bao giờ hiển thị công khai với bất kỳ ai.
               </p>
             </div>
 
-            {/* Cột mốc & thành tựu đồng hành */}
-            <div className="identity-milestones-card">
-              <div className="milestone-title">
-                <Calendar size={15} />
-                <span>Hành trình cá nhân</span>
-              </div>
-
-              <div className="milestone-stats-row">
-                <div className="mini-stat-item">
-                  <span className="mini-stat-num">{stats?.days_since_joined ?? 1}</span>
-                  <span className="mini-stat-label">Ngày gắn bó</span>
-                </div>
-                <div className="mini-stat-item">
-                  <span className="mini-stat-num">{stats?.total_memories ?? 0}</span>
-                  <span className="mini-stat-label">Kỷ niệm</span>
-                </div>
-                <div className="mini-stat-item">
-                  <span className="mini-stat-num">{stats?.total_goals ?? 0}</span>
-                  <span className="mini-stat-label">Mục tiêu</span>
-                </div>
-                <div className="mini-stat-item">
-                  <span className="mini-stat-num">{stats?.total_reflections ?? 0}</span>
-                  <span className="mini-stat-label">Chiêm nghiệm</span>
-                </div>
-              </div>
-
-              {user?.created_at && (
-                <div className="milestone-footer">
-                  <span>Gia nhập từ {formatDate(user.created_at)}</span>
-                </div>
-              )}
-            </div>
-          </aside>
-
-          {/* ══════════════════════════════════════════════════════
-              CỘT PHẢI: FORM CHỈNH SỬA & KHU VỰC BẢO MẬT GỌN GÀNG
-              ══════════════════════════════════════════════════════ */}
-          <main className="profile-main-content">
-            {/* Form chỉnh sửa tên & tiểu sử */}
-            <form className="profile-edit-section-card" onSubmit={handleProfileSave}>
-              <div className="card-section-header">
-                <div>
-                  <span className="section-eyebrow">
-                    <Edit3 size={14} /> CHỈNH SỬA HỒ SƠ
-                  </span>
-                  <h3 className="section-title">Thông tin & Diện mạo của bạn</h3>
-                </div>
+            {/* 5. FORM CHỈNH SỬA THÔNG TIN TRONG ACCORDION DETAILS */}
+            <details className="profile-edit-accordion" open={false} style={{ marginBottom: '20px' }}>
+              <summary className="profile-edit-summary">
+                <Edit3 size={16} />
+                <span>✏️ Chỉnh sửa thông tin cá nhân & diện mạo</span>
                 {isDirty && (
-                  <span className="badge-modified-pill">Có thay đổi chưa lưu</span>
+                  <span className="badge-modified-pill" style={{ marginLeft: 'auto' }}>
+                    Có thay đổi chưa lưu
+                  </span>
                 )}
-              </div>
+              </summary>
 
-              <div className="form-fields-stack">
-                {/* Tên hiển thị */}
-                <div className="enhanced-form-group">
-                  <label className="enhanced-field-label">
-                    <span className="label-with-icon">
-                      <UserIcon size={16} /> Tên hiển thị của bạn
+              <form className="profile-edit-section-card" onSubmit={handleProfileSave} style={{ border: 'none', boxShadow: 'none', background: 'transparent' }}>
+                <div className="form-fields-stack">
+                  {/* Tên hiển thị */}
+                  <div className="enhanced-form-group">
+                    <label className="enhanced-field-label">
+                      <span className="label-with-icon">
+                        <UserIcon size={16} /> Tên hiển thị của bạn
+                      </span>
+                      <span className="char-badge">{displayName.length}/80</span>
+                    </label>
+                    <input
+                      type="text"
+                      className="enhanced-input"
+                      value={displayName}
+                      onChange={e => setDisplayName(e.target.value)}
+                      required
+                      minLength={1}
+                      maxLength={80}
+                      placeholder="Nhập tên gọi thân thương của bạn..."
+                    />
+                    <span className="enhanced-hint">
+                      Tên này xuất hiện trên thanh điều hướng, các bài viết chia sẻ và cuộc trò chuyện với bạn bè.
                     </span>
-                    <span className="char-badge">{displayName.length}/80</span>
-                  </label>
-                  <input
-                    type="text"
-                    className="enhanced-input"
-                    value={displayName}
-                    onChange={e => setDisplayName(e.target.value)}
-                    required
-                    minLength={1}
-                    maxLength={80}
-                    placeholder="Nhập tên gọi thân thương của bạn..."
-                  />
-                  <span className="enhanced-hint">
-                    Tên này xuất hiện trên thanh điều hướng, các bài viết chia sẻ và cuộc trò chuyện với bạn bè.
-                  </span>
-                </div>
+                  </div>
 
-                {/* Tiểu sử */}
-                <div className="enhanced-form-group">
-                  <label className="enhanced-field-label">
-                    <span className="label-with-icon">
-                      <Sparkles size={16} /> Vài dòng về bản thân (Tiểu sử)
+                  {/* Tiểu sử */}
+                  <div className="enhanced-form-group">
+                    <label className="enhanced-field-label">
+                      <span className="label-with-icon">
+                        <Sparkles size={16} /> Vài dòng về bản thân (Tiểu sử)
+                      </span>
+                      <span className="char-badge">{bio.length}/500</span>
+                    </label>
+                    <textarea
+                      className="enhanced-textarea"
+                      value={bio}
+                      onChange={e => setBio(e.target.value)}
+                      rows={4}
+                      maxLength={500}
+                      placeholder="Viết một lời tự nhủ, câu châm ngôn bạn yêu thích hoặc điều bạn đang hướng tới..."
+                    />
+                    <span className="enhanced-hint">
+                      Không bắt buộc. Hãy viết những điều mang lại cho bạn sự an yên và động lực.
                     </span>
-                    <span className="char-badge">{bio.length}/500</span>
-                  </label>
-                  <textarea
-                    className="enhanced-textarea"
-                    value={bio}
-                    onChange={e => setBio(e.target.value)}
-                    rows={4}
-                    maxLength={500}
-                    placeholder="Viết một lời tự nhủ, câu châm ngôn bạn yêu thích hoặc điều bạn đang hướng tới..."
-                  />
-                  <span className="enhanced-hint">
-                    Không bắt buộc. Hãy viết những điều mang lại cho bạn sự an yên và động lực.
-                  </span>
-                </div>
+                  </div>
 
-                {/* Xem trước diện mạo trực quan */}
-                <div className="live-preview-box">
-                  <span className="preview-label">Xem trước giao diện khi người khác thấy bạn:</span>
-                  <div className="preview-card-inner">
-                    <div className="preview-avatar">
-                      {avatarUrl ? (
-                        <img src={avatarUrl} alt="" className="avatar-img-circle" />
-                      ) : (
-                        <span>{displayName ? displayName.charAt(0).toUpperCase() : 'U'}</span>
-                      )}
-                    </div>
-                    <div className="preview-info">
-                      <div className="preview-name">{displayName || 'Chưa đặt tên'}</div>
-                      <div className="preview-bio">{bio || 'Chưa có tiểu sử cá nhân'}</div>
+                  {/* Xem trước diện mạo trực quan */}
+                  <div className="live-preview-box">
+                    <span className="preview-label">Xem trước giao diện khi người khác thấy bạn:</span>
+                    <div className="preview-card-inner">
+                      <div className="preview-avatar">
+                        {avatarUrl ? (
+                          <img src={avatarUrl} alt="" className="avatar-img-circle" />
+                        ) : (
+                          <span>{displayName ? displayName.charAt(0).toUpperCase() : 'U'}</span>
+                        )}
+                      </div>
+                      <div className="preview-info">
+                        <div className="preview-name">{displayName || 'Chưa đặt tên'}</div>
+                        <div className="preview-bio">{bio || 'Chưa có tiểu sử cá nhân'}</div>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Hàng nút hành động dạng nổi */}
-                <div className="enhanced-actions-bar">
-                  {isDirty && (
+                  {/* Hàng nút hành động */}
+                  <div className="enhanced-actions-bar">
+                    {isDirty && (
+                      <button
+                        type="button"
+                        className="button secondary btn-reset-changes"
+                        onClick={handleReset}
+                        disabled={savingProfile}
+                      >
+                        <RotateCcw size={16} />
+                        <span>Khôi phục</span>
+                      </button>
+                    )}
+
                     <button
-                      type="button"
-                      className="button secondary btn-reset-changes"
-                      onClick={handleReset}
+                      type="submit"
+                      className="button primary btn-floating-save"
                       disabled={savingProfile}
                     >
-                      <RotateCcw size={16} />
-                      <span>Khôi phục</span>
+                      <Save size={18} />
+                      <span>{savingProfile ? 'Đang lưu...' : 'Lưu Thay Đổi'}</span>
                     </button>
-                  )}
-
-                  <button
-                    type="submit"
-                    className="button primary btn-floating-save"
-                    disabled={savingProfile}
-                  >
-                    <Save size={18} />
-                    <span>{savingProfile ? 'Đang lưu...' : 'Lưu Thay Đổi'}</span>
-                  </button>
+                  </div>
                 </div>
-              </div>
-            </form>
+              </form>
+            </details>
 
-            {/* ── MỤC BẢO MẬT & ĐỔI MẬT KHẨU ĐƯỢC ẨN GỌN GÀNG (ACCORDION) ── */}
-            <div className="security-accordion-wrapper">
+            {/* 6. MỤC BẢO MẬT & ĐỔI MẬT KHẨU ACCORDION */}
+            <div className="security-accordion-wrapper" style={{ marginBottom: '30px' }}>
               <button
                 type="button"
                 className="security-toggle-header-btn"
@@ -553,8 +632,8 @@ export default function ProfilePage({ user, onUserUpdate }: { user: User | null;
                 </form>
               )}
             </div>
-          </main>
-        </div>
+          </div>
+        )}
 
         {/* ══════════════════════════════════════════════════════
             MODAL CHỌN ẢNH ĐẠI DIỆN HIỆN ĐẠI (POPUP DIALOG)

@@ -57,6 +57,7 @@ function App() {
           <Route path="/messages" element={<MessagesPage />} />
           <Route path="/community" element={<CommunityPage />} />
           <Route path="/profile" element={<ProfilePage user={user} onUserUpdate={setUser} />} />
+          <Route path="/profile/:userId" element={<ProfilePage user={user} onUserUpdate={setUser} />} />
           <Route path="*" element={<HomePage user={user} />} />
         </Routes>
         <AIAgentAssistant user={user} />

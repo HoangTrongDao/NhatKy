@@ -254,6 +254,10 @@ export type FriendAction = {
 
 export const fetchProfile = () => api<User>('/profile')
 
+export async function fetchUserPublicProfile(userId: number): Promise<{ id?: number; display_name: string; bio: string; avatar_url?: string; created_at: string }> {
+  return api(`/profile/${userId}`)
+}
+
 export const updateProfile = (data: ProfileUpdate) =>
 
   api<User>('/profile', { method: 'PATCH', body: JSON.stringify(data) })
