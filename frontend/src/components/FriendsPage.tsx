@@ -30,6 +30,7 @@ import {
   Sparkles,
   RefreshCw,
   Clock,
+  Eye,
 } from 'lucide-react'
 
 // ==========================================
@@ -245,7 +246,7 @@ export default function FriendsPage() {
   // USER CARD
   // ==========================================
 
-  function renderUserCard(user: FriendUser, action?: ReactNode) {
+  function renderUserCard(user: FriendUser, action?: ReactNode, badge?: ReactNode) {
     const initial = user.display_name?.trim().charAt(0).toUpperCase() || '?'
 
     return (
@@ -260,7 +261,8 @@ export default function FriendsPage() {
 
         <div className="friend-info">
           <h3>{user.display_name}</h3>
-          {user.bio?.trim() ? <p>{user.bio.trim()}</p> : null}
+          {badge}
+          {user.bio?.trim() ? <p className="friend-bio">{user.bio.trim()}</p> : null}
         </div>
 
         {action}
@@ -400,15 +402,23 @@ export default function FriendsPage() {
                     filteredFriends.map(friend =>
                       renderUserCard(
                         friend,
-                        <button
-                          className="friend-action"
-                          title="Nhắn tin"
-                          onClick={() =>
-                            navigate(`/messages?user=${friend.id}`)
-                          }
-                        >
-                          <MessageCircle size={15} />
-                        </button>
+                        <div className="friend-buttons">
+                          <button
+                            className="friend-action"
+                            title="Nhắn tin"
+                            onClick={() =>
+                              navigate(`/messages?user=${friend.id}`)
+                            }
+                          >
+                            <MessageCircle size={15} />
+                          </button>
+                          <button
+                            className="friend-view-profile"
+                            onClick={() => navigate(`/profile/${friend.id}`)}
+                          >
+                            <Eye size={13} /> Xem trang cá nhân
+                          </button>
+                        </div>
                       )
                     )
                   ) : (
@@ -430,12 +440,17 @@ export default function FriendsPage() {
                     filteredRequests.map(request => (
                       <div className="friend-card" key={request.id}>
                         <div className="friend-avatar">
-                          {request.sender.avatar_url ? <img src={request.sender.avatar_url} alt='' style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%', display: 'block' }} /> : (request.sender.display_name?.trim().charAt(0).toUpperCase() || '?')}
+                          {request.sender.avatar_url ? (
+                            <img src={request.sender.avatar_url} alt='' style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%', display: 'block' }} />
+                          ) : (
+                            request.sender.display_name?.trim().charAt(0).toUpperCase() || '?'
+                          )}
                         </div>
 
                         <div className="friend-info">
                           <h3>{request.sender.display_name}</h3>
-                          {request.sender.bio?.trim() ? <p>{request.sender.bio.trim()}</p> : null}
+                          <span className="friend-badge">Muốn kết bạn với bạn 💌</span>
+                          {request.sender.bio?.trim() ? <p className="friend-bio">{request.sender.bio.trim()}</p> : null}
                           <span>
                             <Clock size={11} />
                             {' '}Đã gửi lời mời
@@ -460,6 +475,13 @@ export default function FriendsPage() {
                           >
                             <X size={15} />
                           </button>
+
+                          <button
+                            className="friend-view-profile"
+                            onClick={() => navigate(`/profile/${request.sender.id}`)}
+                          >
+                            <Eye size={13} /> Xem trang cá nhân
+                          </button>
                         </div>
                       </div>
                     ))
@@ -480,20 +502,29 @@ export default function FriendsPage() {
                     filteredSuggestions.map(user =>
                       renderUserCard(
                         user,
-                        <button
-                          className="friend-add"
-                          disabled={busyAction !== null}
-                          onClick={() => sendRequest(user.id)}
-                        >
-                          {busyAction === `send-${user.id}` ? (
-                            'Đang gửi...'
-                          ) : (
-                            <>
-                              <UserPlus size={14} />
-                              Kết bạn
-                            </>
-                          )}
-                        </button>
+                        <div className="friend-buttons">
+                          <button
+                            className="friend-add"
+                            disabled={busyAction !== null}
+                            onClick={() => sendRequest(user.id)}
+                          >
+                            {busyAction === `send-${user.id}` ? (
+                              'Đang gửi...'
+                            ) : (
+                              <>
+                                <UserPlus size={14} />
+                                Kết bạn
+                              </>
+                            )}
+                          </button>
+                          <button
+                            className="friend-view-profile"
+                            onClick={() => navigate(`/profile/${user.id}`)}
+                          >
+                            <Eye size={13} /> Xem trang cá nhân
+                          </button>
+                        </div>,
+                        <span className="friend-badge">Gợi ý kết bạn ✨</span>
                       )
                     )
                   ) : (
@@ -513,23 +544,35 @@ export default function FriendsPage() {
                     filteredSentRequests.map(request => (
                       <div className="friend-card" key={request.id}>
                         <div className="friend-avatar">
-                          {request.receiver.avatar_url ? <img src={request.receiver.avatar_url} alt='' style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%', display: 'block' }} /> : (request.receiver.display_name?.trim().charAt(0).toUpperCase() || '?')}
+                          {request.receiver.avatar_url ? (
+                            <img src={request.receiver.avatar_url} alt='' style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%', display: 'block' }} />
+                          ) : (
+                            request.receiver.display_name?.trim().charAt(0).toUpperCase() || '?'
+                          )}
                         </div>
 
                         <div className="friend-info">
                           <h3>{request.receiver.display_name}</h3>
-                          {request.receiver.bio?.trim() ? <p>{request.receiver.bio.trim()}</p> : null}
+                          {request.receiver.bio?.trim() ? <p className="friend-bio">{request.receiver.bio.trim()}</p> : null}
                           <span>Đang chờ phản hồi</span>
                         </div>
 
-                        <button
-                          className="friend-cancel"
-                          title="Hủy lời mời"
-                          disabled={busyAction !== null}
-                          onClick={() => cancelRequest(request.id)}
-                        >
-                          <X size={15} />
-                        </button>
+                        <div className="friend-buttons">
+                          <button
+                            className="friend-cancel"
+                            title="Hủy lời mời"
+                            disabled={busyAction !== null}
+                            onClick={() => cancelRequest(request.id)}
+                          >
+                            <X size={15} />
+                          </button>
+                          <button
+                            className="friend-view-profile"
+                            onClick={() => navigate(`/profile/${request.receiver.id}`)}
+                          >
+                            <Eye size={13} /> Xem trang cá nhân
+                          </button>
+                        </div>
                       </div>
                     ))
                   ) : (
