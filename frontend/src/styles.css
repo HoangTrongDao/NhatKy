@@ -196,33 +196,23 @@ button { cursor: pointer; }
 
 
 .topbar {
-
-  height: 78px;
-
+  height: 70px;
   border-bottom: 1px solid rgba(214, 185, 170, 0.35);
-
   background: rgba(250, 246, 240, 0.94);
-
   position: sticky;
-
   top: 0;
-
   z-index: 100;
-
   backdrop-filter: blur(16px);
-
-  box-shadow: 0 4px 24px rgba(54, 40, 43, 0.05);
-
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 4px 20px rgba(54, 40, 43, 0.04);
 }
 
-
-
 .topbar-inner {
-  max-width: 100%;
+  max-width: 1600px;
   width: 100%;
   height: 100%;
   margin: 0 auto;
-  padding: 0 clamp(16px, 2.5vw, 40px);
+  padding: 0 clamp(16px, 2.5vw, 36px);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -230,21 +220,21 @@ button { cursor: pointer; }
   box-sizing: border-box;
 }
 
-/* ── Topbar Navigation Zones (Left & Right) ── */
+/* ── Topbar Navigation Zones (Balanced 3-Zone Architecture: Left - Center - Right) ── */
 .topbar-left {
   display: flex;
   align-items: center;
-  gap: clamp(12px, 1.8vw, 24px);
-  flex-shrink: 0;
+  flex: 1 0 0;
+  min-width: 0;
 }
 
 .topbar-right {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: clamp(10px, 1.5vw, 20px);
-  flex-shrink: 0;
-  margin-left: auto;
+  flex: 1 0 0;
+  min-width: 0;
+  gap: 10px;
 }
 
 
@@ -380,9 +370,10 @@ button { cursor: pointer; }
 
 
 
-/* ── Floating Island Navigation ── */
+/* ── Floating Island Navigation (Centered & Unified) ── */
 
 .nav-island,
+.nav-island-center,
 .nav-island-left,
 .nav-island-right,
 .nav-group-left,
@@ -391,23 +382,25 @@ button { cursor: pointer; }
   align-items: center;
   gap: 3px;
   padding: 4px 6px;
-  background: rgba(255, 253, 250, 0.92);
+  background: rgba(255, 253, 250, 0.95);
   border: 1px solid var(--line);
   border-radius: 999px;
-  box-shadow: 0 2px 14px rgba(54, 40, 43, 0.04);
+  box-shadow: 0 2px 14px rgba(54, 40, 43, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
   backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   flex-shrink: 0;
+  transition: all 0.2s ease;
 }
 
 .nav-item {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px;
+  padding: 6px 11px;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: 11.5px;
   font-weight: 700;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
   text-transform: uppercase;
   color: var(--muted);
   text-decoration: none;
@@ -6810,6 +6803,37 @@ button { cursor: pointer; }
 
 
 
+/* ── Responsive — Intermediate Desktop (991px - 1260px) ── */
+@media (max-width: 1260px) and (min-width: 991px) {
+  .topbar-inner {
+    padding: 0 16px;
+    gap: 8px;
+  }
+  .nav-island,
+  .nav-island-center {
+    padding: 3px 4px;
+    gap: 2px;
+  }
+  .nav-item {
+    padding: 5px 8px;
+    font-size: 10.5px;
+    gap: 4px;
+  }
+  .nav-icon-badge {
+    width: 20px;
+    height: 20px;
+  }
+  .brand-title {
+    font-size: 17px;
+  }
+  .user-pill {
+    padding: 3px 10px 3px 4px;
+  }
+  .user-pill-name {
+    max-width: 85px;
+  }
+}
+
 /* ═══════════════════════════════════════
 
    Responsive — Tablet (<= 990px)
@@ -6819,6 +6843,8 @@ button { cursor: pointer; }
 @media (max-width: 990px) {
 
   /* Hide desktop topbar navigation islands on tablet/mobile */
+  .nav-island,
+  .nav-island-center,
   .topbar-left .nav-island,
   .topbar-left .nav-island-left,
   .topbar-left .nav-group-left,
@@ -6826,6 +6852,11 @@ button { cursor: pointer; }
   .topbar-right .nav-island-right,
   .topbar-right .nav-group-right {
     display: none !important;
+  }
+
+  .topbar-left,
+  .topbar-right {
+    flex: 0 0 auto;
   }
 
   .nav-island {

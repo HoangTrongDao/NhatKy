@@ -122,9 +122,9 @@ export default function Layout({ user, setUser, children }: LayoutProps) {
   return (
     <div className="app-shell" style={{ width: '100%', maxWidth: '100%', minHeight: '100vh' }}>
       <header className="topbar">
-        <div className="topbar-inner" style={{ maxWidth: '100%', width: '100%', padding: '0 clamp(16px, 3vw, 40px)' }}>
-          {/* ── Left Zone (Bên tay trái): Logo + Personal Nav ── */}
-          <div className="topbar-left" style={{ display: 'flex', alignItems: 'center', gap: 'clamp(12px, 2vw, 24px)' }}>
+        <div className="topbar-inner">
+          {/* ── Left Zone: Brand ── */}
+          <div className="topbar-left">
             <Link className="brand" to="/">
               <span className="brand-mark brand-mark-embossed">
                 <img src="/trongdao.png.png" alt="Logo" className="brand-logo-img" />
@@ -134,35 +134,32 @@ export default function Layout({ user, setUser, children }: LayoutProps) {
                 <span className="brand-badge">NEW BEGINNING</span>
               </div>
             </Link>
-
-            <nav className="nav-island nav-island-left nav-group-left">
-              {user && (
-                <>
-                  <NavLink to="/memories" className="nav-item nav-item-memories">
-                    <span className="nav-icon-badge"><BookHeart size={15} /></span>
-                    <span>Ký ức</span>
-                  </NavLink>
-                  <NavLink to="/reflections" className="nav-item nav-item-reflections">
-                    <span className="nav-icon-badge"><Leaf size={15} /></span>
-                    <span>Nhìn lại</span>
-                  </NavLink>
-                  <NavLink to="/goals" className="nav-item nav-item-goals">
-                    <span className="nav-icon-badge"><Target size={15} /></span>
-                    <span>Ngày mai</span>
-                  </NavLink>
-                </>
-              )}
-              <NavLink to="/community" className="nav-item nav-item-community">
-                <span className="nav-icon-badge"><Sparkles size={15} /></span>
-                <span>Cộng đồng</span>
-              </NavLink>
-            </nav>
           </div>
 
-          {/* ── Right Zone (Bên tay phải): Social Nav + Actions ── */}
-          <div className="topbar-right" style={{ display: 'flex', alignItems: 'center', gap: 'clamp(10px, 1.5vw, 18px)' }}>
+          {/* ── Center Zone: Unified Navigation Island ── */}
+          <nav className="nav-island nav-island-center">
             {user && (
-              <nav className="nav-island nav-island-right nav-group-right">
+              <>
+                <NavLink to="/memories" className="nav-item nav-item-memories">
+                  <span className="nav-icon-badge"><BookHeart size={15} /></span>
+                  <span>Ký ức</span>
+                </NavLink>
+                <NavLink to="/reflections" className="nav-item nav-item-reflections">
+                  <span className="nav-icon-badge"><Leaf size={15} /></span>
+                  <span>Nhìn lại</span>
+                </NavLink>
+                <NavLink to="/goals" className="nav-item nav-item-goals">
+                  <span className="nav-icon-badge"><Target size={15} /></span>
+                  <span>Ngày mai</span>
+                </NavLink>
+              </>
+            )}
+            <NavLink to="/community" className="nav-item nav-item-community">
+              <span className="nav-icon-badge"><Sparkles size={15} /></span>
+              <span>Cộng đồng</span>
+            </NavLink>
+            {user && (
+              <>
                 <NavLink to="/locket" className="nav-item nav-item-locket">
                   <span className="nav-icon-badge"><Camera size={15} /></span>
                   <span>Locket</span>
@@ -180,9 +177,12 @@ export default function Layout({ user, setUser, children }: LayoutProps) {
                     </span>
                   )}
                 </NavLink>
-              </nav>
+              </>
             )}
+          </nav>
 
+          {/* ── Right Zone: User Actions ── */}
+          <div className="topbar-right">
             <div className="topbar-actions">
               {user ? (
                 <div className="user-action-group">
